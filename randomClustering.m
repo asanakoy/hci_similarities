@@ -16,23 +16,36 @@ for i = 1:nSequences
     framesBySequences{i} = find(ismember(imagesSeqNames, seqNames(i,:), 'rows'))';
 end
 
+
 nFrames = size(simMatrix, 1);
-nClusters = 2;
-nMaxPointsPerCluster = 10;
-[clusters, weights] = generateRandomClusters(simMatrix, nFrames, nClusters, nSequences, framesBySequences, nMaxPointsPerCluster);
+nMaxPointsPerCluster = 50;
+nIterations = 1000;
+MAX_POINTS_PER_SEED_SEQ = 2;
+MAX_POINTS_PER_SEQ = 3;
 
-fprintf('generated %d clusters, max %d images each\n', size(clusters,1), nMaxPointsPerCluster);
+weights = testRandomClusterGenerating(simMatrix, nFrames, nIterations, nSequences,...
+                                      framesBySequences, nMaxPointsPerCluster, MAX_POINTS_PER_SEED_SEQ, MAX_POINTS_PER_SEQ);
+avgWeights = sum(weights) / nIterations;
+fprintf('average cluster wight: %f\n', avgWeights);
+histfit(weights);
 
-for i = 1:size(clusters,1)
-    fprintf('cluster %d:  size=%d, weight=%f\n', i, size(clusters{i}, 2), weights(i));
-    visualize(PATH_TO_DATA, imagesSeqNames, image_names, clusters{i});
-end
 
+
+% nClusters = 2;
+% [clusters, weights] = generateIndependentRandomClusters(simMatrix, nFrames, nClusters, nSequences, framesBySequences, nMaxPointsPerCluster);
+% 
+% fprintf('generated %d clusters, max %d images each\n', size(clusters,1), nMaxPointsPerCluster);
+% 
+% for i = 1:size(clusters,1)
+%     fprintf('cluster %d:  size=%d, weight=%f\n', i, size(clusters{i}, 2), weights(i));
+%     visualize(PATH_TO_DATA, imagesSeqNames, image_names, clusters{i});
+% end
 
 end
 
 %==========================================================================
-function [clusters, weights] = generateRandomClusters(simMatrix, nFrames, nClusters, nSequences, framesBySequences, nMaxPointsPerCluster)
+function [clusters, weights] = generateIndependentRandomClusters(simMatrix, nFrames,...
+                                        nClusters, nSequences, framesBySequences, nMaxPointsPerCluster)
 
     nPointsPerCluster = nMaxPointsPerCluster;
     if nFrames < nClusters * nPointsPerCluster
@@ -41,58 +54,21 @@ function [clusters, weights] = generateRandomClusters(simMatrix, nFrames, nClust
 
     sequenceUsed = zeros(nSequences, 1);
 
-    framesPermutation = randperm(nFrames);
     clusters = cell(nClusters, 1);
 
     weights = zeros(nClusters, 1);
     for i = 1:nClusters
-        [clusters{i} framesBySequences]  = createRandomCluster(framesBySequences, nMaxPointsPerCluster);
+        [clusters{i} framesBySequences]  = generateRandomCluster(framesBySequences, nMaxPointsPerCluster,...
+                                                                 maxPointsPerSeedSeq, maxPointsPerSeq);
         weights(i) = computeClusterWeight(simMatrix, clusters{i});
     end
 
 end
 
-%==========================================================================
-function [cluster restFrames] = createRandomCluster(framesBySequences, nMaxPoints)
-    MAX_POINTS_PER_SEQ = 3;
-    MAX_POINTS_PER_SEED_SEQ = 2;
 
-    nSequences = size(framesBySequences,1);
-    restFrames = framesBySequences(randperm(nSequences));
-
-    cluster = [];
-    iSeq = 1;
-    while size(cluster, 2) < nMaxPoints && iSeq <= nSequences 
-        currentSequeneSize = size(restFrames{iSeq},2);
-        restFrames{iSeq} = restFrames{iSeq}(1, randperm(currentSequeneSize));
-        if iSeq > 1
-            nPointsToGenerate = ceil(rand * MAX_POINTS_PER_SEQ);
-        else
-            nPointsToGenerate = ceil(rand * MAX_POINTS_PER_SEED_SEQ);
-        end
-        nPointsToGenerate = min([nPointsToGenerate currentSequeneSize (nMaxPoints - size(cluster, 2))]);
-        cluster = [cluster restFrames{iSeq}(1:nPointsToGenerate)];
-        restFrames{iSeq}(1:nPointsToGenerate) = []; % remove used points
-        
-        iSeq = iSeq + 1;
-    end
-
-end
-
-%==========================================================================
-function [weight] = computeClusterWeight(simMatrix, cluster)
-    weight = 0.0;
-    for i = 1:size(cluster, 2)
-        for j = (i + 1):size(cluster, 2)
-            weight = weight + simMatrix(cluster(1, i), cluster(1, j));
-        end
-    end
-end
 
 %==========================================================================
 function visualize(pathsToImages, imagesSeqNames, imageNames, cluster)
-
-
 
     for i = 1:length(cluster)
 
