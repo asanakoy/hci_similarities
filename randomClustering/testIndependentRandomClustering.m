@@ -1,4 +1,4 @@
-function [ cliques ] = randomClustering()
+function [ cliques ] = testIndependentRandomClustering()
 %create random clustering
 
 load simMatrix_basketball_layup.mat;
