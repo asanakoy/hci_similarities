@@ -1,0 +1,28 @@
+>> runFlann(hogVectors, '10files')
+building index...
+Elapsed time is 186.911614 seconds.
+
+>> runFlann(hogVectors, '50files')
+building index...
+Elapsed time is 485.238083 seconds.
+
+>> runFlann(hogVectors, '100files')
+building index...
+Elapsed time is 2010.773695 seconds.
+
+>> parameters = runFlann(hogVectors, 'all_single');
+building index...
+Elapsed time is 34413.823926 seconds.
+
+filePathToSaveParameters =
+
+~/workspace/similarities/flannSearch/flannParams_all_single.mat
+
+
+>> runFlann_all
+loading hog in memory...
+building index...
+Elapsed time is 45838.957124 seconds.
+filePathToSaveParameters =
+~/workspace/similarities/flannSearch/flannParams_all.mat
+
