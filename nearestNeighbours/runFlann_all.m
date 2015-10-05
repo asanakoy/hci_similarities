@@ -3,7 +3,7 @@ function [ parameters ] = runFlann_all()
 %   Detailed explanation goes here
 
 fprintf('loading hog in memory...\n');
-load('~/workspace/similarities/hogForFlann/hogForFlann_all.mat', 'hogVectors');
+load('~/workspace/similarities/hog_zeropadded/hogForFlann_all.mat', 'hogVectors');
 
 parameters = runFlann(hogVectors, 'all');
 

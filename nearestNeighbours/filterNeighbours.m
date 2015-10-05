@@ -1,5 +1,5 @@
-function [ sameCategoryNeighbours, sameCategoryDistances, otherNeighbours, otherDistances ] =...
-    filterNeighbours( searchedFrameId, neighboursIds, distances, categoryLookuptable )
+function [ sameCategoryNeighbours, sameCategoryDistances, otherNeighbours, otherDistances, otherIsFlipped ] =...
+    filterNeighbours( searchedFrameId, neighboursIds, distances, isFlipped, categoryLookuptable )
 
 %FILETRNEIGHBOURS Separate neighbours in the same category from neighbours in
 %other categories
@@ -23,6 +23,7 @@ sameCategoryDistances = distances(sameCatIndices);
 otherCatIndices = setdiff(1:length(neighboursIds), sameCatIndices);
 otherNeighbours = neighboursIds(otherCatIndices);
 otherDistances = distances(otherCatIndices);
+otherIsFlipped = isFlipped(otherCatIndices);
 
 end
 

@@ -12,8 +12,8 @@ end
 
 DATASET_PATH = sprintf('~/workspace/similarities/hogForFlann/hogForFlann_%s.mat', SUFFIX);
 % WARNING! Not to use relative path in FLANN_INDEX_PATH here! It will cause SEGFAULT!
-FLANN_INDEX_PATH = sprintf('/net/hciserver03/storage/asanakoy/workspace/similarities/flannSearch/flannData/flannIndex_%s.index', SUFFIX); 
-PARAMETERS_PATH = sprintf('~/workspace/similarities/flannSearch/flannData/flannParams_%s.mat', SUFFIX);
+FLANN_INDEX_PATH = sprintf('/net/hciserver03/storage/asanakoy/workspace/similarities/nearestNeighbours/flannData_zeropadded/flannIndex_%s.index', SUFFIX); 
+PARAMETERS_PATH = sprintf('~/workspace/similarities/nearestNeighbours/flannData_zeropadded/flannParams_%s.mat', SUFFIX);
 
 flannHandler = FlannHandler();
 flannHandler.init(DATASET_PATH, FLANN_INDEX_PATH, PARAMETERS_PATH);
@@ -28,7 +28,7 @@ imageLabel = sprintf('original image. id: %d', searchedFrameId);
     
 numberOfNns = 100;
 
-CATEGORY_DATA_PATH = '/net/hciserver03/storage/asanakoy/workspace/similarities/flannSearch/flannData/categoryLookupTable_all.mat';
+CATEGORY_DATA_PATH = '/net/hciserver03/storage/asanakoy/workspace/similarities/nearestNeighbours/data/dataInfo_all.mat';
 categoryData = load(CATEGORY_DATA_PATH);
 
 [neighboursIds, distances] = flannHandler.getNns(flannHandler.data_.hogVectors(:, searchedFrameId), numberOfNns);   

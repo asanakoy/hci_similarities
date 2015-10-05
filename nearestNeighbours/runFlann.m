@@ -17,8 +17,8 @@ tic;
 [index, parameters] = flann_build_index(dataset, build_params);
 toc
 
-filePathToSaveParameters = sprintf('~/workspace/similarities/flannSearch/flannData/flannParams_%s.mat', name)
-filePathToSaveIndex = sprintf('flannData/flannIndex_%s.index', name)
+filePathToSaveParameters = sprintf('~/workspace/similarities/nearestNeighbours/flannData_zeropadded/flannParams_%s.mat', name)
+filePathToSaveIndex = sprintf('flannData_zeropadded/flannIndex_%s.index', name)
 
 fprintf('saving parameters...\n');
 save(filePathToSaveParameters, 'parameters');
