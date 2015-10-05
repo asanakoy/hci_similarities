@@ -1,5 +1,5 @@
-hogFolder = 'HOG/Video1/hog/';
-whitenedHogFolder = 'HOG/Video1/whitened_hog/';
+hogFolder = '/net/hciserver03/storage/asanakoy/workspace/HMDB51/hog/';
+whitenedHogFolder = '/net/hciserver03/storage/asanakoy/workspace/HMDB51/whitehog/';
 
 dirnames = dir(hogFolder);
 idx = arrayfun(@(x)x.name(1)=='.',dirnames);
@@ -8,6 +8,7 @@ dirnames(idx) = [];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Compute HOG mean
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fprintf('Compute HOG mean\n');
 
 if ~exist('hog_mu','var')
 
@@ -47,6 +48,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Compute HOG covariance 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fprintf('Compute HOG covariance\n');
 
 for i = 1:size(hog_size,1)
     hogsum(i).data = zeros(prod(hog_size(i,:)),prod(hog_size(i,:)),'single');
@@ -186,7 +188,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Decorrelate HOG features
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+fprintf('Decorrelate HOG features\n');
             
 for i = 1:numel(dirnames)
     
