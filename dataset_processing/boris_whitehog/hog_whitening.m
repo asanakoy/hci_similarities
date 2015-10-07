@@ -1,5 +1,20 @@
-hogFolder = '/net/hciserver03/storage/asanakoy/workspace/HMDB51/hog/';
-whitenedHogFolder = '/net/hciserver03/storage/asanakoy/workspace/HMDB51/whitehog/';
+function [] = hog_whitening(hogFolder, whitenedHogFolder)
+% Compute whitened HOG
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if nargin < 2 || isempty(hogFolder) || isempty(whitenedHogFolder)
+    hogFolder = '/net/hciserver03/storage/asanakoy/workspace/HMDB51/hog/';
+    whitenedHogFolder = '/net/hciserver03/storage/asanakoy/workspace/HMDB51/whitehog/';
+end
+
+if hogFolder(end) ~= '/'
+    hogFolder(end+1) = '/';
+end
+
+if whitenedHogFolder(end) ~= '/'
+    whitenedHogFolder(end+1) = '/';
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 dirnames = dir(hogFolder);
 idx = arrayfun(@(x)x.name(1)=='.',dirnames);
@@ -229,4 +244,6 @@ for i = 1:numel(dirnames)
         
     end
 end
+
+end % function [] = hog_whitening()
 
