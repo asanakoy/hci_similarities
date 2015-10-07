@@ -1,13 +1,12 @@
-function [simMatrix] = buildSimMatrix( category )
+function [simMatrix] = buildSimMatrixFromPairwise( category,  path_pairwise_sim, path_crops, path_save)
 %BUILDSIMMATRIX Summary of this function goes here
 %   Detailed explanation goes here
-%     pathsim = fullfile('/net/hciserver03/storage/asanakoy/workspace/HMDB51/pairwise_sim', category);
-%     path_crops = fullfile('/net/hciserver03/storage/asanakoy/workspace/HMDB51/crops', category);
-%     pathsave = fullfile('/net/hciserver03/storage/asanakoy/workspace/HMDB51/similarities');
 
-    pathsim = fullfile('/net/hciserver03/storage/mbautist/Desktop/mbautista/Exemplar_CNN/pairwise_sim', category);
-    path_crops = fullfile('/net/hciserver03/storage/mbautist/Desktop/mbautista/Exemplar_CNN/crops', category);
-    pathsave = fullfile('/net/hciserver03/storage/asanakoy/workspace/tmp_similarities');
+if nargin < 4 || isempty(path_pairwise_sim)
+%     path_pairwise_sim = fullfile('/net/hciserver03/storage/asanakoy/workspace/HMDB51/pairwise_sim', category);
+%     path_crops = fullfile('/net/hciserver03/storage/asanakoy/workspace/HMDB51/crops', category);
+%     path_save = fullfile('/net/hciserver03/storage/asanakoy/workspace/HMDB51/similarities');
+end
 
     seq_names = getNonEmptySubdirs(path_crops);
 
@@ -25,11 +24,11 @@ function [simMatrix] = buildSimMatrix( category )
         fprintf('\b\b\b\b\b\b\b\b\b\b\b%5d/%5d', i, length(seq_names));
         
         % Get all similarity *.mat files for the current i-th sequence
-        cur_seq_mat_fileinfos = dir([pathsim,'/',seq_names{i},'*.mat']);
+        cur_seq_mat_fileinfos = dir([path_pairwise_sim,'/',seq_names{i},'*.mat']);
         cur_seq_mat_filenames = sort({cur_seq_mat_fileinfos.name});
         for j = 1:length(cur_seq_mat_filenames)
 
-            load(fullfile(pathsim, cur_seq_mat_filenames{j}),'val')
+            load(fullfile(path_pairwise_sim, cur_seq_mat_filenames{j}),'val')
             if j == 1
                 assert(strcmp([seq_names{i} '__' seq_names{i} '.mat'], cur_seq_mat_filenames{j}) == 1);
                 %sim = max(val,[],3);
@@ -62,7 +61,9 @@ function [simMatrix] = buildSimMatrix( category )
 
     [simMatrix, flipval] = max(simMatrix, [], 3);
     flipval = flipval - 1;
-    mkdir(pathsave);
-    save(fullfile(pathsave, ['/simMatrix_', category, '.mat']), 'simMatrix', 'flipval', 'image_names', 'seq_names', '-v7.3');
+    if ~exist(path_save, 'dir')
+        mkdir(path_save);
+    end
+    save(fullfile(path_save, ['/simMatrix_', category, '.mat']), 'simMatrix', 'flipval', 'image_names', 'seq_names', '-v7.3');
 end
 
