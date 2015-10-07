@@ -94,11 +94,11 @@ def procChunk((threadId, begin, end)):
             if i == searchedIndex or Shared.categoryLookuptable[i] == currentCategory:
                 continue
 
-            isImageFlipped = False
+            isImageFlipped = 0
             dist = getDistanceSquared(Shared.hogVectors[searchedIndex], Shared.hogVectors[i])
             distWithFlipped = getDistanceSquared(Shared.hogVectors[searchedIndex], Shared.hogVectorsFlipped[i])
             if distWithFlipped < dist:
-                isImageFlipped = True
+                isImageFlipped = 1
                 dist = distWithFlipped
 
             heapq.heappush(nns[searchedIndex - begin], (-dist, i + 1, isImageFlipped))  # i + 1 to make indices 1-based
