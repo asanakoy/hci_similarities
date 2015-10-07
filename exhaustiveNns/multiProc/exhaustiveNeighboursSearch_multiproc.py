@@ -29,7 +29,7 @@ def main():
     # hogVectorsFlipped = readMatFileToSharedMemory('/net/hciserver03/storage/asanakoy/workspace/similarities/hog_tiled/hogFlipped_all.mat',
     #                            'hogVectorsFlipped')
     # filepath = '/net/hciserver03/storage/asanakoy/workspace/similarities/hog_tiled/hog_all.mat'
-    dataset_path = '~/workspace/OlympicSports/'
+    dataset_path = '/export/home/asanakoy/workspace/OlympicSports/'
     filepath = dataset_path + 'whitehog_tiled/hog_all.mat'
     print "Reading  file ", filepath
     hogFile = h5py.File(filepath, 'r')
@@ -46,13 +46,13 @@ def main():
     #############################################################
 
     print "Reading categotyLookupTable..."
-    dataInfoFile = h5py.File(dataset_path + 'data/dataInfo_all.mat', 'r')
+    dataInfoFile = h5py.File(dataset_path + 'data/dataInfo.mat', 'r')
     Shared.categoryLookuptable = dataInfoFile['categoryLookupTable'][:]
     print "categotyLookupTable size: ", Shared.categoryLookuptable.size
     print("Done.\nReading and preparing data: %s seconds ---" % (time.time() - startTime))
 
     #############################################################
-    nWorkers = 1
+    nWorkers = 80
     step = int(math.ceil(1.0 * len(Shared.hogVectors) / nWorkers))
     print('running %d workers, chunk size: %d\n' % (nWorkers, step))
 
