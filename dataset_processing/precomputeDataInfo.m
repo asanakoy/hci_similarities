@@ -1,13 +1,19 @@
-function [ ] = precomputeDataInfo()
+function [ ] = precomputeDataInfo(dataset_path)
 %precomputeCategoryLookupTable Build table containing categories for each frame.
 %   Saves result variables to file. 
 %   categories - list of categories' names
 %   categoryLookupTable - i-th element is the category that i-th frame
 % belongs to. Using global indexing for all frames (not per sequence indexing).
-PATH_TO_WHITEHOG = '/net/hciserver03/storage/asanakoy/workspace/similarities/whitehog';
-    
-sequenceFilesPathes = subdir(fullfile(PATH_TO_WHITEHOG, '*.mat'));
-sequenceFilesPathes = {sequenceFilesPathes.name};
+
+% if nargin < 1 || isempty(dataset_path)
+%     dataset_path = '/dir'
+% end 
+
+whitehog_path = fullfile(dataset_path, DatasetStructure.WHITEHOG_DIR);
+
+addpath('../lib'); % for subdir(...)
+sequenceFilesPathes = subdir(fullfile(whitehog_path, '*.mat'));
+sequenceFilesPathes = sort({sequenceFilesPathes.name});
 
 sequenceBeginIndex = 0;
 sequenceEndIndex = 0;
@@ -30,7 +36,7 @@ for i = 1:NUMBER_OF_FILES
     currentCategoryName = tmp.cname;
     
     if (isempty(categoryNames) || ~strcmp(categoryNames{end}, currentCategoryName))
-        categoryNames = {categoryNames{:} currentCategoryName};
+        categoryNames = [categoryNames {currentCategoryName}];
     end
     
     sequenceBeginIndex = sequenceEndIndex + 1;
@@ -50,7 +56,7 @@ for i = 1:NUMBER_OF_FILES
     
 end
 
-filePathToSave = '~/workspace/similarities/nearestNeighbours/data/dataInfo_all.mat';
+filePathToSave = fullfile(dataset_path, DatasetStructure.DATA_DIR, 'dataInfo.mat');
 fprintf('\nSaving data to %s\n', filePathToSave);
 
 save(filePathToSave, '-v7.3', 'sequenceFilesPathes', 'categoryNames', 'sequenceLookupTable', 'categoryLookupTable', 'maxHogSize', 'totalNumberOfVectors');
