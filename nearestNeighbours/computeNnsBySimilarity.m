@@ -19,7 +19,7 @@ for i = 1:length(hogVectors)
     end
    
     
-    sim =  getHogSimilarity(hog, hogVectors{i}, 0, inversedHog);
+    sim =  getHogSimilarity(hog, hogVectors{i}, 1, inversedHog);
     
     isFlipped(i) = (sim(2) > sim(1));
     similarities(i) = max(sim);
