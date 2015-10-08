@@ -1,12 +1,17 @@
 
 addpath(genpath('/export/home/asanakoy/workspace/similarities'));
 
-fprintf('loadind whitehog\n');
-load('/export/home/asanakoy/workspace/OlympicSports/data/whitehog_all.mat');
-fprintf('loaded!\n');
+if ~exist('hog', 'var')
+    fprintf('loadind whitehog\n');
+    load('/export/home/asanakoy/workspace/OlympicSports/data/whitehog_all.mat');
+    fprintf('loaded!\n');
+end
+if ~exist('categoryLookupTable', 'var')
+    load (DatasetStructure.getDataInfoPath());
+end
+
 
 N = 100000;
-
 
 NUM_BATCHES = 100;
 BATCH_SIZE = floor(N / NUM_BATCHES);
@@ -25,7 +30,7 @@ for k = 1:NUM_BATCHES
 
 %         fprintf('ID: %d\n', i);
         [ ~, ~, nns{i}, distances{i}, isFlipped{i} ] = ...
-                                computeOtherCategoryNns(i, hog );
+                                computeOtherCategoryNns(i, hog, categoryLookupTable);
 
     end
     fprintf('%s Batch %d ready!\n', datestr(datetime('now')), k);
