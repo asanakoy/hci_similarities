@@ -23,7 +23,7 @@ for k = 1:NUM_BATCHES
     
     parfor i = begin:endd
 
-        fprintf('ID: %d\n', i);
+%         fprintf('ID: %d\n', i);
         [ ~, ~, nns{i}, distances{i}, isFlipped{i} ] = ...
                                 computeOtherCategoryNns(i, hog );
 
