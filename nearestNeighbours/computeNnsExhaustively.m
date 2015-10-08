@@ -1,7 +1,7 @@
-function [nns, distances, isFlipped] = computeNnsExhaustively(frameId, hogVectors)
+function [nns, distances, isFlipped] = computeNnsExhaustively(frameId, hogVectors, maxHogSize)
 % EXHAUSTIVE search of NNs
 
-HOG_SIZE = [25, 24, 31];
+HOG_SIZE = maxHogSize;
 
 tic;
 distances = zeros(length(hogVectors), 1);
