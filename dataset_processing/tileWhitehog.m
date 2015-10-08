@@ -2,17 +2,17 @@ function [hogVectors] = tileWhitehog(dataset_path)
 % Resize all hog vectors to the minimal common bounding box, using tiling.
 % Needed to find nearest neighbours for frames across all categories
 
-PATH_TO_WHITEHOG = fullfile(dataset_path, DatasetStructure.WHITEHOG_DIR);
+PATH_TO_WHITEHOG = DatasetStructure.getWhitehogDirPath(dataset_path);
     
 files = subdir(fullfile(PATH_TO_WHITEHOG, '*.mat'));
 files = sort({files.name});
 
-dataInfo = load(fullfile(dataset_path, DatasetStructure.DATA_DIR, 'dataInfo.mat'));
+dataInfo = load(DatasetStructure.getDataInfoPath(dataset_path));
 NEW_SIZE = dataInfo.maxHogSize;
 TOTAL_NUMBER_OF_VECTORS = dataInfo.totalNumberOfVectors;
 
-hogVectors = zeros(prod(NEW_SIZE), TOTAL_NUMBER_OF_VECTORS);
-hogVectorsFlipped = zeros(prod(NEW_SIZE), TOTAL_NUMBER_OF_VECTORS);
+hogVectors = zeros(prod(NEW_SIZE), TOTAL_NUMBER_OF_VECTORS, 'single');
+hogVectorsFlipped = zeros(prod(NEW_SIZE), TOTAL_NUMBER_OF_VECTORS, 'single');
 currentVectorIndex = 1;
 
 NUMBER_OF_FILES = length(files);
@@ -35,8 +35,8 @@ for i = 1:NUMBER_OF_FILES
 end
 
 % filePathToSave = sprintf('~/workspace/similarities/hog_tiled/hog_%files.mat', NUMBER_OF_FILES);
-filePathToSave = fullfile(dataset_path, DatasetStructure.WHITEHOG_TILED_DIR, 'hog.mat');
-filePathToSaveFlipped = fullfile(dataset_path, DatasetStructure.WHITEHOG_TILED_DIR, 'hogFlipped.mat');
+filePathToSave = fullfile(DatasetStructure.getWhitehogTiledDirPath(dataset_path), 'hog.mat');
+filePathToSaveFlipped = fullfile(DatasetStructure.getWhitehogTiledDirPath(dataset_path), 'hogFlipped.mat');
 fprintf('\nSaveng data to %s\n', filePathToSave);
 save(filePathToSave, '-v7.3', 'hogVectors');
 save(filePathToSaveFlipped, '-v7.3', 'hogVectorsFlipped');
@@ -45,7 +45,7 @@ end
 
 function [tiledImage] = tileImage(oldImage, newSize)
 
-        tiledImage = zeros(newSize);
+        tiledImage = zeros(newSize, 'single');
         oldSize = size(oldImage);
 
         start(1) = floor((newSize(1) - oldSize(1)) / 2) + 1;

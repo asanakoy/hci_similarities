@@ -25,7 +25,10 @@ parfor k = 1:numel(hog1)*numel(hog2)
     [i,j] = ind2sub([numel(hog1) numel(hog2)], k);
                
     H1 = hog1(i).data;
+    H1_inversed = H1(end:-1:1, end:-1:1, end:-1:1);
     H2 = hog2(j).data;
+    
+    overlap_area = min(size(H1,1), size(H2,1)) * min(size(H1,2), size(H2,2));
     
     H2p = zeros(size(H1) + [2 * padsize,2 * padsize,0]);
     
@@ -36,10 +39,11 @@ parfor k = 1:numel(hog1)*numel(hog2)
       H2(floor((size(H2, 1) - M) / 2) + [1:M], floor((size(H2, 2) - N) / 2) + [1:N], :);
     
     % compute the convolution
-    C = convn(H2p, H1(end:-1:1, end:-1:1, end:-1:1), 'valid');
+    C = convn(H2p, H1_inversed, 'valid');
     
-    val1(k) = max(C(:));
-    [I1(k), J1(k)] = find(C==max(C(:)), 1);
+    maxConvVal = max(C(:));
+    val1(k) = maxConvVal / overlap_area;
+    [I1(k), J1(k)] = find(C == maxConvVal, 1);
      
     % everything the same, now with the flipped descriptor
     H2 = H2(:,end:-1:1,:);
@@ -47,10 +51,11 @@ parfor k = 1:numel(hog1)*numel(hog2)
     H2p(floor((size(H2p, 1) - M) / 2) + [1:M], floor((size(H2p, 2) - N) / 2) + [1:N], :) = ...
       H2(floor((size(H2, 1) - M) / 2) + [1:M], floor((size(H2, 2) - N) / 2) + [1:N],:);
     
-    C = convn(H2p, H1(end:-1:1, end:-1:1, end:-1:1), 'valid');
+    C = convn(H2p, H1_inversed, 'valid');
     
-    val2(k) = max(C(:));
-    [I2(k), J2(k)] = find(C == max(C(:)), 1);
+    maxConvVal = max(C(:));
+    val2(k) = maxConvVal / overlap_area;
+    [I2(k), J2(k)] = find(C == maxConvVal, 1);
         
 end
 

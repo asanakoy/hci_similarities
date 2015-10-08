@@ -9,7 +9,7 @@ function [ ] = precomputeDataInfo(dataset_path)
 %     dataset_path = '/dir'
 % end 
 
-whitehog_path = fullfile(dataset_path, DatasetStructure.WHITEHOG_DIR);
+whitehog_path = DatasetStructure.getWhitehogDirPath(dataset_path);
 
 addpath('../lib'); % for subdir(...)
 sequenceFilesPathes = subdir(fullfile(whitehog_path, '*.mat'));
@@ -21,10 +21,11 @@ sequenceEndIndex = 0;
 NUMBER_OF_FILES = length(sequenceFilesPathes);
 totalNumberOfVectors = 0;
 maxHogSize = [0 0 0];
-sequenceLookupTable(NUMBER_OF_FILES) = struct('begin', [], 'end', []);
-categoryLookupTable = [];
+sequenceLookupTable(NUMBER_OF_FILES) = struct('begin', int32.empty(0, 0), 'end', int32.empty(0, 0));
+categoryLookupTable = int16.empty(0, 0);
 categoryNames = {};
 
+fprintf('Total number of files: %d', NUMBER_OF_FILES);
 fprintf('Reading files and building categoryLookupTable:         ');
 for i = 1:NUMBER_OF_FILES
     fprintf('\b\b\b\b\b\b\b%7d', i);
@@ -56,7 +57,7 @@ for i = 1:NUMBER_OF_FILES
     
 end
 
-filePathToSave = fullfile(dataset_path, DatasetStructure.DATA_DIR, 'dataInfo.mat');
+filePathToSave = DatasetStructure.getDataInfoPath(dataset_path);
 fprintf('\nSaving data to %s\n', filePathToSave);
 
 save(filePathToSave, '-v7.3', 'sequenceFilesPathes', 'categoryNames', 'sequenceLookupTable', 'categoryLookupTable', 'maxHogSize', 'totalNumberOfVectors');
