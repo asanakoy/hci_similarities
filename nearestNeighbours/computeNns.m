@@ -23,14 +23,14 @@ for k = 1:NUM_BATCHES
     distances = cell (1, BATCH_SIZE);
     isFlipped = cell (1, BATCH_SIZE);
     
-    begin = (k-1) * BATCH_SIZE + 1;
+    begin = (k-1) * BATCH_SIZE;
     endd = k * BATCH_SIZE;
     
-    parfor i = begin:endd
+    parfor i = 1:BATCH_SIZE
 
 %         fprintf('ID: %d\n', i);
         [ ~, ~, nns{i}, distances{i}, isFlipped{i} ] = ...
-                                computeOtherCategoryNns(i, hog, categoryLookupTable);
+                                computeOtherCategoryNns(i + begin, hog, categoryLookupTable);
 
     end
     fprintf('%s Batch %d ready!\n', datestr(datetime('now')), k);
