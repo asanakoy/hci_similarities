@@ -13,7 +13,7 @@ TOTAL_NUMBER_OF_VECTORS = dataInfo.totalNumberOfVectors;
 
 hogVectors = zeros(prod(NEW_SIZE), TOTAL_NUMBER_OF_VECTORS, 'single');
 hogVectorsFlipped = zeros(prod(NEW_SIZE), TOTAL_NUMBER_OF_VECTORS, 'single');
-currentVectorIndex = 1;
+currentVectorIndex = 1;-u
 
 NUMBER_OF_FILES = length(files);
 
@@ -37,7 +37,7 @@ end
 % filePathToSave = sprintf('~/workspace/similarities/hog_tiled/hog_%files.mat', NUMBER_OF_FILES);
 filePathToSave = fullfile(DatasetStructure.getWhitehogTiledDirPath(dataset_path), 'hog.mat');
 filePathToSaveFlipped = fullfile(DatasetStructure.getWhitehogTiledDirPath(dataset_path), 'hogFlipped.mat');
-fprintf('\nSaveng data to %s\n', filePathToSave);
+fprintf('\nSaving data to %s\n', filePathToSave);
 save(filePathToSave, '-v7.3', 'hogVectors');
 save(filePathToSaveFlipped, '-v7.3', 'hogVectorsFlipped');
 

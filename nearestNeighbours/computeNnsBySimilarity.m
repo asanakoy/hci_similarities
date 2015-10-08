@@ -28,6 +28,7 @@ end
 
 fprintf('sorting distances...');
 [similarities, nns] = sort(similarities, 'descend');
+nns = uint32(nns);
 isFlipped = isFlipped(nns);
 
 % remove self frame

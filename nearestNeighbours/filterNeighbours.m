@@ -5,7 +5,7 @@ function [ sameCategoryNeighbours, sameCategoryDistances, otherNeighbours, other
 %other categories
 
 searchedCategory = categoryLookuptable(searchedFrameId);
-sameCatIndices = []; 
+sameCatIndices = uint32.empty(0,0); 
 
 for i=1:length(neighboursIds)
 %     assert(neighboursIds(i) ~= searchedFrameId);
