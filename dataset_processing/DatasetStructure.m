@@ -1,6 +1,6 @@
 classdef DatasetStructure
     properties (Constant)   
-        DATASET_PATH     = '/export/home/asanakoy/workspace/OlympicSports/';
+%         DATASET_PATH     = '/export/home/asanakoy/workspace/OlympicSports/';
         CLIPS_DIR        = 'clips';
         BBOXES_DIR       = 'boxes';
         FRAMES_DIR       = 'frames';

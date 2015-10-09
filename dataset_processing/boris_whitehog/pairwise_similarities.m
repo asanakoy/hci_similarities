@@ -13,7 +13,7 @@ idx = arrayfun(@(x) x.name(1)~='.',  cname);
 cname = {cname(idx).name};
 
 
-for k = 34:numel(cname)
+for k = 1:numel(cname)
     
     class = cname{k};
     

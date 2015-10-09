@@ -12,7 +12,7 @@ title = sprintf('original id %d', frameId);
 showImage(frameId, sequenceFilesPathes, sequenceLookupTable, title);
 
 [ ~, ~, otherNns, otherDistances, otherIsFlipped ] = ...
-                        computeOtherCategoryNns(frameId, hogVectors );
+                        computeOtherCategoryNns(frameId, hogVectors, categoryLookupTable );
 
 % SNG.dist{k} = otherDistances;
 % SNG.nns{k} = otherNns;

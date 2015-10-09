@@ -13,7 +13,7 @@ TOTAL_NUMBER_OF_VECTORS = dataInfo.totalNumberOfVectors;
 
 hogVectors = zeros(prod(NEW_SIZE), TOTAL_NUMBER_OF_VECTORS, 'single');
 hogVectorsFlipped = zeros(prod(NEW_SIZE), TOTAL_NUMBER_OF_VECTORS, 'single');
-currentVectorIndex = 1;-u
+currentVectorIndex = 1;
 
 NUMBER_OF_FILES = length(files);
 

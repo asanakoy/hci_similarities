@@ -3,8 +3,7 @@ function [ sameCatNns, sameCatDistances, otherNns, otherDistances, otherIsFlippe
 %   Detailed explanation goes here
 
 
-
-% [nns, distances, isFlipped] = computeNnsExhaustively(iFrameId, hogVectors, maxHogSize);
+% [nns, distances, isFlipped] = computeNnsExhaustively(iFrameId, hogVectors, [25,24,31]);
 [nns, distances, isFlipped] = computeNnsBySimilarity(iFrameId, hogVectors);
     
 [ sameCatNns, sameCatDistances, otherNns, otherDistances, otherIsFlipped ] =...

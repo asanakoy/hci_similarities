@@ -1,5 +1,9 @@
-function [nns, similarities, isFlipped] = computeNnsBySimilarity(frameId, hogVectors)
+function [nns, similarities, isFlipped] = computeNnsBySimilarity(frameId, hogVectors, isQuiet)
 % EXHAUSTIVE search of NNs
+
+if nargin < 3 || isempty(isQuiet)
+    isQuiet = 0;
+end
 
 tic;
 similarities = zeros(length(hogVectors), 1, 'single');
@@ -8,13 +12,15 @@ isFlipped = zeros(length(hogVectors), 1, 'uint8');
 hog = hogVectors{frameId};
 inversedHog = hog(end:-1:1, end:-1:1, end:-1:1);
 
-fprintf('Iteration:         ');
+if ~isQuiet
+    fprintf('Iteration:         ');
+end
 for i = 1:length(hogVectors)
     if (i == frameId)
         similarities(i) = realmax;
         continue;
     end
-    if (mod(i, 100) == 0)
+    if (~isQuiet && mod(i, 100) == 0)
         fprintf('\b\b\b\b\b\b\b%7d', i);
     end
    
@@ -26,7 +32,6 @@ for i = 1:length(hogVectors)
 
 end
 
-fprintf('sorting distances...');
 [similarities, nns] = sort(similarities, 'descend');
 nns = uint32(nns);
 isFlipped = isFlipped(nns);
@@ -36,7 +41,9 @@ similarities(1) = [];
 nns(1) = [];
 isFlipped(1) = [];
 
-fprintf('\n');
-toc
+if ~isQuiet
+    fprintf('\n');
+    toc
+end
 
 end
