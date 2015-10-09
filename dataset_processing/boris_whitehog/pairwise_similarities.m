@@ -37,10 +37,10 @@ for k = 1:numel(cname)
                 hog2 = hog;
 
                 tic; 
-                [val, I, J] = hog_similarity(hog1, hog2, 2);  %#ok<ASGLU>
+                val = hog_similarity(hog1, hog2, 2); %#ok<NASGU>
                 toc
 
-                save(filepath, 'val', 'I', 'J');
+                save(filepath, 'val');
             end
     
         end

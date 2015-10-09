@@ -1,14 +1,15 @@
 function [val] = getHogSimilarity(H1, H2, padsize, H1_inversed)
-% HOGSIM - Calculates the similarity between the HOG descriptors 
+% GETHOGSIMILARITY - Calculates the similarity between the HOG descriptors 
 %
-% Syntax:  [val] = hog_similarity(hog1, hog2, padsize)
+% Syntax:  [val] = getHogSimilarity(hog1, hog2, padsize)
 %
 % Inputs:
 %    hog1, hog2 - HOG descriptors
-%    convsize - scope of the convolution 
+%    padsize - size of zero padding around the image
 %
 % Outputs:
-%    val  - max convolution score
+%    val(1), val(2) - max convolution score for original (1) and flipped (2)
+%    descriptor
 %
 
 if nargin < 4 || isempty(H1_inversed)
