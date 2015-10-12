@@ -21,8 +21,9 @@ NUM_BATCHES = 100;
 BATCH_SIZE = floor(N / NUM_BATCHES);
 fprintf('Batches:%d, BATCH_SIZE:%d\n', NUM_BATCHES, BATCH_SIZE);
 
-NUM_OF_WORKERS = 70;
-parpool('local', NUM_OF_WORKERS);
+c = parcluster('local');
+c.NumWorkers = 40;
+parpool(c, c.NumWorkers);
 
 for k = 1:NUM_BATCHES
     fprintf('%s batch:%d\n', datestr(datetime('now')), k);
