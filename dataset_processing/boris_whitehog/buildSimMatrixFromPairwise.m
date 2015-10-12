@@ -23,13 +23,17 @@ path_crops = fullfile(path_crops, category);
         fprintf('\b\b\b\b\b\b\b\b\b\b\b%5d/%5d', i, length(seq_names));
         
         % Get all similarity *.mat files for the current i-th sequence
-        cur_seq_mat_fileinfos = dir([path_pairwise_sim,'/',seq_names{i},'*.mat']);
+        cur_seq_mat_fileinfos = dir([path_pairwise_sim,'/',seq_names{i},'__*.mat']);
         cur_seq_mat_filenames = sort({cur_seq_mat_fileinfos.name});
         for j = 1:length(cur_seq_mat_filenames)
 
             load(fullfile(path_pairwise_sim, cur_seq_mat_filenames{j}), 'val');
             if j == 1
-                assert(strcmp([seq_names{i} '__' seq_names{i} '.mat'], cur_seq_mat_filenames{j}) == 1);
+                if strcmp([seq_names{i} '__' seq_names{i} '.mat'], cur_seq_mat_filenames{j}) ~= 1
+                    fprintf('\ncur filename: \t%s\n', cur_seq_mat_filenames{j});
+                    fprintf('expected filename: \t%s\n', [seq_names{i} '__' seq_names{i} '.mat']);
+                    assert(false);
+                end
                 %sim = max(val,[],3);
                 val(:,:,1) = (val(:,:,1)+val(:,:,1)')/2;
                 val(:,:,2) = (val(:,:,2)+val(:,:,2)')/2;
@@ -59,7 +63,7 @@ path_crops = fullfile(path_crops, category);
 
 
     [simMatrix, flipval] = max(simMatrix, [], 3);
-    flipval = flipval - 1;
+    flipval = uint8(flipval - 1);
     if ~exist(path_save, 'dir')
         mkdir(path_save);
     end

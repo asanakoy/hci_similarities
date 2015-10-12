@@ -11,9 +11,9 @@ function [val] = hog_similarity(hog1, hog2, padsize)
 %    val  - max convolution score
 %
 
-val1 = zeros(numel(hog1), numel(hog2));
+val1 = zeros(numel(hog1), numel(hog2), 'single');
 
-val2 = zeros(numel(hog1), numel(hog2));
+val2 = zeros(numel(hog1), numel(hog2), 'single');
 
 parfor k = 1:numel(hog1)*numel(hog2)    
     

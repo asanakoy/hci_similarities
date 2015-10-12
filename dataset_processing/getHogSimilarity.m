@@ -48,7 +48,7 @@ val = [val1, val2];
 end
 
 function [maxVal] = convolve(a, b)
-        res = convn(a, b, 'valid');
+    res = convn(a, b, 'valid');
     
 %     res = convolve2(a(:,:,1), b(:,:,1), 'valid');
 %     for i = 2:3
