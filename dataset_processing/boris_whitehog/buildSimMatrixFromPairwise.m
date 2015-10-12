@@ -2,19 +2,18 @@ function [simMatrix] = buildSimMatrixFromPairwise( category,  path_pairwise_sim,
 %BUILDSIMMATRIX Summary of this function goes here
 %   Detailed explanation goes here
 
-if nargin < 4 || isempty(path_pairwise_sim)
-%     path_pairwise_sim = fullfile('/net/hciserver03/storage/asanakoy/workspace/HMDB51/pairwise_sim', category);
-%     path_crops = fullfile('/net/hciserver03/storage/asanakoy/workspace/HMDB51/crops', category);
-%     path_save = fullfile('/net/hciserver03/storage/asanakoy/workspace/HMDB51/similarities');
-end
+narginchk(4, 4); 
+
+path_pairwise_sim = fullfile(path_pairwise_sim, category);
+path_crops = fullfile(path_crops, category);
 
     seq_names = getNonEmptySubdirs(path_crops);
 
-    image_names = [];
+    image_names = {};
     for i = 1:length(seq_names)
         crop_names = getFilesInDir(fullfile(path_crops, seq_names{i}), '.*\.png');
         for j = 1:length(crop_names)
-            image_names(end+1,:) = ['./', seq_names{i}, '/', crop_names{j}];
+            image_names{end+1} = ['./', seq_names{i}, '/', crop_names{j}];
         end
     end
 
@@ -28,7 +27,7 @@ end
         cur_seq_mat_filenames = sort({cur_seq_mat_fileinfos.name});
         for j = 1:length(cur_seq_mat_filenames)
 
-            load(fullfile(path_pairwise_sim, cur_seq_mat_filenames{j}),'val')
+            load(fullfile(path_pairwise_sim, cur_seq_mat_filenames{j}), 'val');
             if j == 1
                 assert(strcmp([seq_names{i} '__' seq_names{i} '.mat'], cur_seq_mat_filenames{j}) == 1);
                 %sim = max(val,[],3);
