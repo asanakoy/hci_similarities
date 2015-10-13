@@ -75,7 +75,7 @@ def procChunk((threadId, begin, end)):
     logFileName = "proc_%d_log.txt" % threadId
     f = open(logFileName, 'w')
 
-    f.write("\nstarted worker %d" % threadId)
+    f.write("started worker %d\n" % threadId)
     print "\nstarted worker %d" % threadId
     # print "Len HogVectors: ", len(hogVectors)
     chunkSize = end - begin
@@ -115,7 +115,7 @@ def procChunk((threadId, begin, end)):
 
         if (searchedIndex - begin + 1) % 30 == 0:
             timestamp = datetime.now().strftime('%d.%m %H:%M:%S')
-            f.write("\n%s. %d: Frames processed: %d / %d" % (timestamp, threadId, searchedIndex - begin + 1, end - begin))
+            f.write("%s. %d: Frames processed: %d / %d\n" % (timestamp, threadId, searchedIndex - begin + 1, end - begin))
 
         if (searchedIndex - begin + 1) % 900 == 0:
             saveSnapshot(threadId, "snapshot_%d_nns_all_%05d_%05d.mat" % (searchedIndex - begin + 1, begin, end),
