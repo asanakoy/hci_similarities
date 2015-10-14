@@ -10,7 +10,8 @@ similarities = zeros(length(hogVectors), 1, 'single');
 isFlipped = zeros(length(hogVectors), 1, 'uint8');
 
 hog = hogVectors{frameId};
-inversedHog = hog(end:-1:1, end:-1:1, end:-1:1);
+inversed_hog = hog(end:-1:1, end:-1:1, end:-1:1);
+flipped_inversed_hog = hog(end:-1:1, :, end:-1:1);
 
 if ~isQuiet
     fprintf('Iteration:         ');
@@ -25,7 +26,8 @@ for i = 1:length(hogVectors)
     end
    
     
-    sim =  getHogSimilarity(hog, hogVectors{i}, 1, inversedHog);
+    sim =  getHogSimilarity2(hog, hogVectors{i}, 0, inversed_hog, flipped_inversed_hog);
+%     sim =  getHogSimilarity(hog, hogVectors{i}, 0, inversed_hog); % this is slower
     
     isFlipped(i) = (sim(2) > sim(1));
     similarities(i) = max(sim);

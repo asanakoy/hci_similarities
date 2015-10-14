@@ -2,14 +2,15 @@
 % 
 % indices = find(categoryLookupTable == catId);
 % frameId = indices(ceil(rand * length(indices)));
-frameId = 80010;
+frameId = 80030;
 %frameId = ceil(rand * 105650);
 % frameId = SNG.frameId{k};
 
 fprintf('searched frame ID: %d\n', frameId);
 figure;
 title = sprintf('original id %d', frameId);
-showImage(frameId, sequenceFilesPathes, sequenceLookupTable, title);
+dataset_path = '/export/home/asanakoy/workspace/OlympicSports';
+showImage(frameId, dataset_path, sequenceFilesPathes, sequenceLookupTable, title);
 
 [ ~, ~, otherNns, otherDistances, otherIsFlipped ] = ...
                         computeOtherCategoryNns(frameId, hogVectors, categoryLookupTable );
@@ -26,7 +27,8 @@ showImage(frameId, sequenceFilesPathes, sequenceLookupTable, title);
 % DBL.frameId{k} = frameId;git add
 % k = k + 1;
 NNS_NUM_TO_SHOW = 40;
-showNeighbours( otherNns(1:NNS_NUM_TO_SHOW), ...
+showNeighbours( dataset_path, ...
+                otherNns(1:NNS_NUM_TO_SHOW), ...
                 otherDistances(1:NNS_NUM_TO_SHOW), ...
                 otherIsFlipped(1:NNS_NUM_TO_SHOW), ...
                 sequenceFilesPathes, sequenceLookupTable );

@@ -1,11 +1,11 @@
-function [] = showImage( frameId, sequnceFilPathes, sequencesLookupTable, label, isFlipped)
+function [] = showImage( frameId, dataset_path, sequnceFilPathes, sequencesLookupTable, label, isFlipped)
 %showImage show Image
 %   Detailed explanation goes here
 
-if nargin < 5 || isempty(isFlipped)
-   isFlipped = 0;
-end
-    img = imread(getImagePath(frameId, sequnceFilPathes, sequencesLookupTable));
+    if nargin < 6 || isempty(isFlipped)
+       isFlipped = 0;
+    end
+    img = imread(getImagePath(frameId, dataset_path, sequnceFilPathes, sequencesLookupTable));
     if isFlipped
         img = fliplr(img);
     end
