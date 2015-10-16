@@ -2,8 +2,8 @@ function [] = buildAllSimMatrices( dataset_path )
 %Build similatity matrices for each category.
 % crops, whitehog must be computed before running this procedure
 
-PAIRWISE_SIM_DIR = 'pairwise_sim_normalized';
-SIM_DIR = 'sim_normalized';
+PAIRWISE_SIM_DIR = 'pairwise_sim';
+SIM_DIR = 'sim';
 
 fprintf('Building pairwise sim matrices inside each category\n');
 pairwise_similarities( DatasetStructure.getWhitehogDirPath(dataset_path),...
