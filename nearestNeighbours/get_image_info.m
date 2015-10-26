@@ -1,4 +1,4 @@
-function [ info ] = getImageInfo( frameId, dataset_path, sequencesFilePathes, sequencesLookupTable, crops_dir_name )
+function [ info ] = get_image_info( frameId, data_info, crops_dir_name )
 %GETIMAGEINFO Returns an object containing information about image
 %
 % crops_dir_name - name of the crops dir, specify if you want not default one
@@ -8,14 +8,14 @@ function [ info ] = getImageInfo( frameId, dataset_path, sequencesFilePathes, se
 % info.absolute_path - absolute path to the image
 
     if exist('crops_dir_name', 'var')
-        CROPS_PATHS = fullfile(dataset_path, crops_dir_name);
+        CROPS_PATHS = fullfile(data_info.dataset_path, crops_dir_name);
     else
-        CROPS_PATHS = fullfile(dataset_path,...
+        CROPS_PATHS = fullfile(data_info.dataset_path,...
                                DatasetStructure.CROPS_DIR);
     end
     
-    [fileIndex, newImageIndex] = getSequenceIndex(frameId, sequencesLookupTable);
-    sequenceInfoFile = matfile(sequencesFilePathes{fileIndex});
+    [fileIndex, newImageIndex] = getSequenceIndex(frameId, data_info.sequenceLookupTable);
+    sequenceInfoFile = matfile(data_info.sequenceFilesPathes{fileIndex});
     imageInfo = sequenceInfoFile.hog(1, newImageIndex);
     absolute_path = fullfile(CROPS_PATHS, imageInfo.cname,... 
                                           imageInfo.vname,...
