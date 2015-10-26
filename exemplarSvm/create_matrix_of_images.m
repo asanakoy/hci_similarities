@@ -16,7 +16,7 @@ for i = 1:length(categories)
         fprintf(clean_symbols);
         fprintf('%04d/%04d', j, length(sequences));
         seq_dir_path = fullfile(crops_dir_path, categories{i}, sequences{j});
-        seq_crops = readAllImagesFromSequence(seq_dir_path, categories{i}, sequences{j});
+        seq_crops = readAllImagePathesFromSequence(seq_dir_path, categories{i}, sequences{j});
         if (i == 1 && j == 1)
             crops = seq_crops;
         else
@@ -28,7 +28,7 @@ for i = 1:length(categories)
 end
 toc
 
-filePathToSave = fullfile(DatasetStructure.getDataDirPath(dataset_path), 'crops_227x227.mat');
+filePathToSave = fullfile(DatasetStructure.getDataDirPath(dataset_path), 'crops_227x227_relative_img_pathes.mat');
 fprintf('\nSaveng data to %s\n', filePathToSave);
 save(filePathToSave, '-v7.3', 'crops');
 
@@ -40,6 +40,17 @@ function [crops] = readAllImagesFromSequence(seq_dir_path, category_name, sequen
     crops(length(crops_names)) = struct('img', [], 'cname', '', 'vname', sequence_name);
     for k = 1:length(crops_names)
         crops(k).img = uint8(imread(fullfile(seq_dir_path, crops_names{k})));
+        crops(k).cname = category_name;
+        crops(k).vname = sequence_name;
+    end   
+end
+
+function [crops] = readAllImagePathesFromSequence(seq_dir_path, category_name, sequence_name)
+    
+    crops_names = getFilesInDir(seq_dir_path, '.*\.png');
+    crops(length(crops_names)) = struct('img_relative_path', [], 'cname', '', 'vname', sequence_name);
+    for k = 1:length(crops_names)
+        crops(k).img_relative_path = fullfile(category_name, sequence_name, crops_names{k});
         crops(k).cname = category_name;
         crops(k).vname = sequence_name;
     end   

@@ -10,6 +10,7 @@ if ~exist('dataset', 'var')
     tic;
     fprintf('Reading dataset file...\n');
     CROPS_ARRAY_FILEPATH = fullfile(DatasetStructure.getDataDirPath(dataset_path), 'crops_227x227.mat');
+    %CROPS_ARRAY_FILEPATH = fullfile(DatasetStructure.getDataDirPath(dataset_path), 'crops_global_info.mat');
     dataset = load(CROPS_ARRAY_FILEPATH);
     toc
 end

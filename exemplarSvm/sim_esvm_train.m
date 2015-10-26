@@ -18,17 +18,17 @@
 % a testing set of images along with the top detections.
 function [models,M] = sim_esvm_train(anchor_id, dataset, data_info, ESVM_MODELS_DIR, RUN_TEST)
 
-ESVM_LIB_PATH = '/net/hciserver03/storage/asanakoy/workspace/exemplarsvm';
+ESVM_LIB_PATH = '~/workspace/exemplarsvm';
 addpath(genpath(ESVM_LIB_PATH))
 
-dataset_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports';
+dataset_path = '~/workspace/OlympicSports';
 % dataset_path = '/net/hciserver03/storage/asanakoy/workspace_copy_22.10.15/OlympicSports';
 
 
 if ~exist('dataset', 'var')
     tic;
-    fprintf('Reading dataset file...\n');
-    CROPS_ARRAY_FILEPATH = fullfile(DatasetStructure.getDataDirPath(dataset_path), 'crops_227x227.mat');
+    fprintf('Opening crops global info file...\n');
+    CROPS_ARRAY_FILEPATH = fullfile(DatasetStructure.getDataDirPath(dataset_path), 'crops_global_info.mat');
     dataset = load(CROPS_ARRAY_FILEPATH);
     toc
 end
