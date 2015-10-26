@@ -26,5 +26,11 @@ if ~exist('labeled_data', 'var')
 end
 
 parfor i = 1:length(labeled_data.labels)
-    sim_esvm_train(labeled_data.category_offset + labeled_data.labels(i).anchor, dataset, data_info, ESVM_MODELS_DIR, RUN_TEST);
+    frame_id = labeled_data.category_offset + labeled_data.labels(i).anchor;
+    output_dir = fullfile(ESVM_MODELS_DIR, sprintf('%06d', frame_id));
+    if (exist(output_dir, 'dir'))
+        continue;
+    end
+    
+    sim_esvm_train(frame_id, dataset, data_info, output_dir, RUN_TEST);
 end
