@@ -2,9 +2,14 @@ addpath(genpath('~/workspace/similarities'));
 dataset_path = '~/workspace/OlympicSports';
 
 ESVM_MODELS_DIR = '~/workspace/OlympicSports/esvm_models_tmp';
-% if exist(ESVM_MODELS_DIR, 'dir')
-%     rmdir(ESVM_MODELS_DIR, 's');
-% end
+if exist(ESVM_MODELS_DIR, 'dir')
+    prompt = sprintf('Do you want to delete existing folder %s? Y/N [N]: ', ESVM_MODELS_DIR);
+    str = input(prompt,'s');
+    if strcmp(str, 'yes')
+        rmdir(ESVM_MODELS_DIR, 's');
+        fprintf('Deleted %s.', ESVM_MODELS_DIR);
+    end
+end
 
 if ~exist('dataset', 'var')
     tic;
