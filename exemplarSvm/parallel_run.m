@@ -3,7 +3,7 @@ dataset_path = '~/workspace/OlympicSports';
 
 ESVM_MODELS_DIR = '~/workspace/OlympicSports/esvm_models';
 if exist(ESVM_MODELS_DIR, 'dir')
-    prompt = sprintf('Do you want to delete existing folder %s? Y/N [N]: ', ESVM_MODELS_DIR);
+    prompt = sprintf('Do you want to delete existing folder %s? yes/N [N]: ', ESVM_MODELS_DIR);
     str = input(prompt,'s');
     if strcmp(str, 'yes')
         rmdir(ESVM_MODELS_DIR, 's');
@@ -26,16 +26,29 @@ end
 
 RUN_TEST = 0;
 
-if ~exist('labeled_data', 'var')
-    labeled_data = load('~/workspace/dataset_labeling/merged_data/labels_long_jump_21.10.mat');
-end
+fprintf('Starting parpool...\n');
+c = parcluster('local');
+c.NumWorkers = 12;
+parpool(c, c.NumWorkers);
 
-parfor i = 1:length(labeled_data.labels)
-    frame_id = labeled_data.category_offset + labeled_data.labels(i).anchor;
-    output_dir = fullfile(ESVM_MODELS_DIR, sprintf('%06d', frame_id));
-    if (exist(output_dir, 'dir'))
-        continue;
+% if ~exist('labeled_data', 'var')
+%     labeled_data = load('~/workspace/dataset_labeling/merged_data/labels_long_jump_21.10.mat');
+% end
+labels_dir_path = '~/workspace/dataset_labeling/untrained_data';
+file_list = getFilesInDir(labels_dir_path, '.*\.mat');
+for file_id = 1:length(file_list)
+    frpintf('File: %s\n', file_list{file_id});
+    
+    labeled_data = load(fullfile(labels_dir_path, file_list{file_id}));
+
+    parfor i = 1:length(labeled_data.labels)
+        frame_id = labeled_data.category_offset + labeled_data.labels(i).anchor;
+        output_dir = fullfile(ESVM_MODELS_DIR, sprintf('%06d', frame_id));
+        if (exist(output_dir, 'dir'))
+            continue;
+        end
+
+        sim_esvm_train(frame_id, dataset, data_info, output_dir, RUN_TEST);
     end
     
-    sim_esvm_train(frame_id, dataset, data_info, output_dir, RUN_TEST);
 end

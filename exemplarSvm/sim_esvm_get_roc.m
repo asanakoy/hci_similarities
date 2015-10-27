@@ -3,7 +3,7 @@ function [] = sim_esvm_get_roc( labels_filepath )
 %   Detailed explanation goes here
 
 dataset_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports';
-ESVM_MODELS_DIR_NAME = 'esvm_models_tmp';
+ESVM_MODELS_DIR_NAME = 'esvm_models_bowling';
 
 if ~exist('data_info', 'var')
     data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
@@ -52,10 +52,10 @@ for model_num = 1:2
             global_anchor_id = category_offset + labels(i).anchor;
             esvm_model_path = fullfile(data_info.dataset_path, ...
                 ESVM_MODELS_DIR_NAME, sprintf('%06d', global_anchor_id), ...
-                sprintf('%06d-svm.mat', global_anchor_id))
+                sprintf('%06d-svm-removed_top_hrd.mat', global_anchor_id))
             
             if ~exist(esvm_model_path, 'file')
-                fprintf('No model. Skipping.\n');
+                fprintf('WARNING! No model. Skipping label.\n');
                 continue;
             end
             
@@ -69,9 +69,9 @@ for model_num = 1:2
         
         
         [x{i},y{i}, auc{i}] = perfcurve(ground_thruth, sims, true);
-        if (model_num == 2)
-            x{i} = x{i} + 0.02;
-        end
+%         if (model_num == 2)
+%             x{i} = x{i} + 0.02;
+%         end
     end
     
     mean_x = linspace(0, 1, 100);
