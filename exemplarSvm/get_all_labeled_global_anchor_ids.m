@@ -9,7 +9,7 @@ file_list = getFilesInDir(labels_dir_path, '.*\.mat');
 fprintf('Getting all anchor ids...\n');
 for i = 1:length(file_list)
     fprintf('Labels file %d\n', i);
-    file = load(fullfile(dir_path, file_list{i}));
+    file = load(fullfile(labels_dir_path, file_list{i}));
     
     anchor_ids = [anchor_ids (cell2mat({file.labels.anchor}) + file.category_offset)];
     
