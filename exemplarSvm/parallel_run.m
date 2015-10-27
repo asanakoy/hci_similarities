@@ -1,13 +1,13 @@
 addpath(genpath('~/workspace/similarities'));
 dataset_path = '~/workspace/OlympicSports';
 
-ESVM_MODELS_DIR = '~/workspace/OlympicSports/esvm_models';
+ESVM_MODELS_DIR = '~/workspace/OlympicSports/esvm_models_untrained_data';
 if exist(ESVM_MODELS_DIR, 'dir')
     prompt = sprintf('Do you want to delete existing folder %s? yes/N [N]: ', ESVM_MODELS_DIR);
     str = input(prompt,'s');
     if strcmp(str, 'yes')
         rmdir(ESVM_MODELS_DIR, 's');
-        fprintf('Deleted %s.', ESVM_MODELS_DIR);
+        fprintf('Deleted %s.\n', ESVM_MODELS_DIR);
     end
 end
 
@@ -29,7 +29,11 @@ RUN_TEST = 0;
 fprintf('Starting parpool...\n');
 c = parcluster('local');
 c.NumWorkers = 12;
-parpool(c, c.NumWorkers);
+if (~strcmp(version('-release'), '2014b'))
+    matlabpool(c, c.NumWorkers);
+else
+    parpool(c, c.NumWorkers);
+end
 
 % if ~exist('labeled_data', 'var')
 %     labeled_data = load('~/workspace/dataset_labeling/merged_data/labels_long_jump_21.10.mat');
@@ -37,7 +41,7 @@ parpool(c, c.NumWorkers);
 labels_dir_path = '~/workspace/dataset_labeling/untrained_data';
 file_list = getFilesInDir(labels_dir_path, '.*\.mat');
 for file_id = 1:length(file_list)
-    frpintf('File: %s\n', file_list{file_id});
+    fprintf('File: %s\n', file_list{file_id});
     
     labeled_data = load(fullfile(labels_dir_path, file_list{file_id}));
 

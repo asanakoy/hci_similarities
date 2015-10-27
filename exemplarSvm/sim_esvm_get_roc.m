@@ -1,9 +1,9 @@
-function [] = sim_esvm_get_roc( labels_filepath )
+function [] = sim_esvm_get_roc( category_name )
 %GETROC Summary of this function goes here
 %   Detailed explanation goes here
 
 dataset_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports';
-ESVM_MODELS_DIR_NAME = 'esvm_models_bowling';
+ESVM_MODELS_DIR_NAME = 'esvm_models_all';
 
 if ~exist('data_info', 'var')
     data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
@@ -12,9 +12,10 @@ if ~isfield(data_info, 'dataset_path')
     data_info.dataset_path = dataset_path;
 end
 
-if ~exist('labels_filepath', 'var')
-    labels_filepath = '/net/hciserver03/storage/asanakoy/workspace/dataset_labeling/merged_data/labels_bowling_23.10.mat';
-end
+% if ~exist('labels_filepath', 'var')
+labels_filepath = sprintf(['/net/hciserver03/storage/asanakoy/workspace/'...
+                          'dataset_labeling/merged_data_27.10/labels_%s.mat'], category_name);
+% end
 load(labels_filepath);
 
 %path_labels = ['./labels/labels_',category_name,'.mat'];
