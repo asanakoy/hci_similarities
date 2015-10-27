@@ -40,6 +40,7 @@ anchor_global_ids = get_all_labeled_global_anchor_ids(labels_dir_path);
 
 parfor i = 1:length(anchor_global_ids)
     frame_id = anchor_global_ids(i);
+    fprintf('----Anchor %d\n', frame_id);
     output_dir = fullfile(ESVM_MODELS_DIR, sprintf('%06d', frame_id));
     if (exist(output_dir, 'dir'))
         continue;
