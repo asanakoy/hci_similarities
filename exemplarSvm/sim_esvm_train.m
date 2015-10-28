@@ -16,7 +16,7 @@
 % define the positive bounding boxes.  The learned Exemplar-SVMs
 % plus the calibration M-matrix are first learned, then applied to
 % a testing set of images along with the top detections.
-function [models,M] = sim_esvm_train(anchor_id, dataset, data_info, output_dir, TRAIN_DATA_FRACTION, RUN_TEST, initial_models,)
+function [models,M] = sim_esvm_train(anchor_id, dataset, data_info, output_dir, TRAIN_DATA_FRACTION, RUN_TEST, initial_models)
 % TRAIN_DATA_FRACTION = 0.1; % fraction of data to use from each category
 
 ESVM_LIB_PATH = '~/workspace/exemplarsvm';
