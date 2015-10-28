@@ -88,7 +88,7 @@ e_stream_set = esvm_get_pascal_stream(stream_params, ...
 % image shows the initial HOG features used to define the exemplar.
 if (~exist('initial_models', 'var'))
     initial_models = esvm_initialize_exemplars(e_stream_set, params, ...
-                                           models_name);
+                                           [models_name '-svm']);
 else
     fprintf('Using pre-trained model');
 end

@@ -4,8 +4,9 @@ function [] = sim_esvm_get_roc( category_name )
 
 dataset_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports';
 PLOTS_DIR = 'plots';
-ESVM_DATA_DRACTION = '0.2';
-ESVM_MODELS_DIR_NAME = ['esvm_models_all_' ESVM_DATA_DRACTION];
+ESVM_DATA_FRACTION_STR = '0.2';
+ROUND_STR = '2';
+ESVM_MODELS_DIR_NAME = ['esvm_models_all_' ESVM_DATA_FRACTION_STR '_round' ROUND_STR];
 
 if ~exist('data_info', 'var')
     data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
@@ -25,13 +26,16 @@ path_simMatrix = ['~/workspace/OlympicSports/sim/simMatrix_', category_name, '.m
 
 figure
 color = {'r','b'};
-model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_DRACTION]};
+model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR]};
 NMODELS = 2;
 
 for model_num = 1:NMODELS
     if model_num == 1
         load(path_simMatrix)
     end
+    
+    mean_x = [];
+    mean_y = [];
     
     for i = 1:length(labels)
         
@@ -52,6 +56,8 @@ for model_num = 1:NMODELS
             esvm_model_path = fullfile(data_info.dataset_path, ...
                 ESVM_MODELS_DIR_NAME, sprintf('%06d', global_anchor_id), ...
                 sprintf('%06d-svm-removed_top_hrd.mat', global_anchor_id))
+            %                 sprintf('models/%06d-svm.mat', global_anchor_id));
+
             
             if ~exist(esvm_model_path, 'file')
                 fprintf('WARNING! No model. Skipping label.\n');
@@ -90,7 +96,8 @@ end
 legend(model_name);
 xlabel('False positive rate'); ylabel('True positive rate');
 title(strrep(category_name,'_', '-'));
-file_base = fullfile(dataset_path, PLOTS_DIR, sprintf('ROC_%s_ESVM-%s_HOG', category_name, ESVM_DATA_DRACTION));
+file_base = fullfile(dataset_path, PLOTS_DIR, sprintf('ROC_%s_%s_%s', ...
+                     category_name, model_name{1}, model_name{2}));
 savefig([file_base '.fig']);
 
 fileID = fopen([file_base '.txt'], 'w');
