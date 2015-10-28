@@ -4,8 +4,8 @@ function [] = sim_esvm_get_roc( category_name )
 
 dataset_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports';
 PLOTS_DIR = 'plots';
-ESVM_DATA_FRACTION_STR = '0.2';
-ROUND_STR = '2';
+ESVM_DATA_FRACTION_STR = '0.1';
+ROUND_STR = '1';
 ESVM_MODELS_DIR_NAME = ['esvm_models_all_' ESVM_DATA_FRACTION_STR '_round' ROUND_STR];
 
 if ~exist('data_info', 'var')
@@ -26,7 +26,8 @@ path_simMatrix = ['~/workspace/OlympicSports/sim/simMatrix_', category_name, '.m
 
 figure
 color = {'r','b'};
-model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR]};
+% model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR '-nocut']};
+model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR]}
 NMODELS = 2;
 
 for model_num = 1:NMODELS
@@ -56,7 +57,8 @@ for model_num = 1:NMODELS
             esvm_model_path = fullfile(data_info.dataset_path, ...
                 ESVM_MODELS_DIR_NAME, sprintf('%06d', global_anchor_id), ...
                 sprintf('%06d-svm-removed_top_hrd.mat', global_anchor_id))
-            %                 sprintf('models/%06d-svm.mat', global_anchor_id));
+%                 sprintf('models/%06d-svm.mat', global_anchor_id));
+
 
             
             if ~exist(esvm_model_path, 'file')
