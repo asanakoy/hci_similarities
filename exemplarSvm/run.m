@@ -25,6 +25,7 @@ if ~exist('data_info', 'var')
 end
 
 RUN_TEST = 0;
+TRAIN_DATA_FRACTION = 0.1;
 
 if ~exist('labeled_data', 'var')
     labeled_data = load('~/workspace/dataset_labeling/merged_data/labels_bowling_23.10.mat');
@@ -37,5 +38,5 @@ for i = 1:length(labeled_data.labels)
         continue;
     end
     
-    sim_esvm_train(frame_id, dataset, data_info, output_dir, RUN_TEST);
+    sim_esvm_train(frame_id, dataset, data_info, output_dir, TRAIN_DATA_FRACTION, RUN_TEST);
 end

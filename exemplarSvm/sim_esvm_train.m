@@ -16,7 +16,8 @@
 % define the positive bounding boxes.  The learned Exemplar-SVMs
 % plus the calibration M-matrix are first learned, then applied to
 % a testing set of images along with the top detections.
-function [models,M] = sim_esvm_train(anchor_id, dataset, data_info, output_dir, RUN_TEST)
+function [models,M] = sim_esvm_train(anchor_id, dataset, data_info, output_dir, TRAIN_DATA_FRACTION, RUN_TEST, initial_models,)
+% TRAIN_DATA_FRACTION = 0.1; % fraction of data to use from each category
 
 ESVM_LIB_PATH = '~/workspace/exemplarsvm';
 addpath(genpath(ESVM_LIB_PATH))
@@ -51,8 +52,7 @@ anchor_ids = [anchor_id];
 models_name = sprintf('%06d', anchor_ids(1)); % category name
 
 category_name = data_info.categoryNames{data_info.categoryLookupTable(anchor_id)};
-DATA_FRACTION = 0.1; % fraction of data to use from each category
-[pos_set, neg_set] = sim_esvm_create_train_dataset(anchor_ids, category_name, dataset_path, dataset, data_info, DATA_FRACTION);
+[pos_set, neg_set] = sim_esvm_create_train_dataset(anchor_ids, category_name, dataset_path, dataset, data_info, TRAIN_DATA_FRACTION);
 
 
 
@@ -86,8 +86,12 @@ e_stream_set = esvm_get_pascal_stream(stream_params, ...
 % HOG grid overlayed.  The second image shows the HOG mask along
 % with its offset to the ground-truth bounding box.  The third
 % image shows the initial HOG features used to define the exemplar.
-initial_models = esvm_initialize_exemplars(e_stream_set, params, ...
+if (~exist('initial_models', 'var'))
+    initial_models = esvm_initialize_exemplars(e_stream_set, params, ...
                                            models_name);
+else
+    fprintf('Using pre-trained model');
+end
 
 
 %% Set exemplar-svm training parameters

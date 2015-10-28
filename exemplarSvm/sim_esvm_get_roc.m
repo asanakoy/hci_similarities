@@ -3,7 +3,9 @@ function [] = sim_esvm_get_roc( category_name )
 %   Detailed explanation goes here
 
 dataset_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports';
-ESVM_MODELS_DIR_NAME = 'esvm_models_all';
+PLOTS_DIR = 'plots';
+ESVM_DATA_DRACTION = '0.2';
+ESVM_MODELS_DIR_NAME = ['esvm_models_all_' ESVM_DATA_DRACTION];
 
 if ~exist('data_info', 'var')
     data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
@@ -21,16 +23,12 @@ load(labels_filepath);
 %path_labels = ['./labels/labels_',category_name,'.mat'];
 path_simMatrix = ['~/workspace/OlympicSports/sim/simMatrix_', category_name, '.mat'];
 
-
-[round,group] = meshgrid([1 2 3]',[1 20]');
-round = round(:);
-group = group(:);
 figure
-
 color = {'r','b'};
-model_name = {'HOG-LDA', 'ESVM'};
+model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_DRACTION]};
+NMODELS = 2;
 
-for model_num = 1:2
+for model_num = 1:NMODELS
     if model_num == 1
         load(path_simMatrix)
     end
@@ -69,7 +67,7 @@ for model_num = 1:2
         %sims = sims/sum(sims);
         
         
-        [x{i},y{i}, auc{i}] = perfcurve(ground_thruth, sims, true);
+        [x{i},y{i}, ~] = perfcurve(ground_thruth, sims, true);
 %         if (model_num == 2)
 %             x{i} = x{i} + 0.02;
 %         end
@@ -85,12 +83,22 @@ for model_num = 1:2
     end
     
     plot(mean_x, mean(mean_y, 1), color{model_num})
+    auc(model_num) = trapz(mean_x, mean(mean_y, 1));
     hold on
 end
 
-legend(model_name)
-xlabel('False positive rate'); ylabel('True positive rate')
-title(category_name)
+legend(model_name);
+xlabel('False positive rate'); ylabel('True positive rate');
+title(strrep(category_name,'_', '-'));
+file_base = fullfile(dataset_path, PLOTS_DIR, sprintf('ROC_%s_ESVM-%s_HOG', category_name, ESVM_DATA_DRACTION));
+savefig([file_base '.fig']);
+
+fileID = fopen([file_base '.txt'], 'w');
+for i = 1:NMODELS
+    fprintf(fileID,'%s-auc:\t %d\n', model_name{i}, auc(i));
+    fprintf('%s-auc:\t %d\n', model_name{i}, auc(i));
+end
+fclose(fileID);
 
 end
 
