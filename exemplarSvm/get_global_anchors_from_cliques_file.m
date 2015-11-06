@@ -10,7 +10,7 @@ anchor_ids = [];
 anchor_flipvals = false([0, 0]);
 category_offset = get_category_offset(category_name, data_info);
 
-if ~exist(cliques_ids, 'var')
+if ~exist('cliques_ids', 'var')
     cliques_ids = 1:length(file.cliques{1});
 end
 
