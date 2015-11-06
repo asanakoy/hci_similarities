@@ -15,10 +15,10 @@ if ~exist('cliques_ids', 'var')
 end
 
 for i = 1:length(cliques_ids)
-    assert(clique_ids(i) <= length(file.cliques{1}), 'incorrect clique id: %d\n', i);
+    assert(cliques_ids(i) <= length(file.cliques{1}), 'incorrect clique id: %d\n', i);
     
-    anchor_ids = [anchor_ids (file.cliques{1}{clique_ids(i)} + category_offset)];
-    anchor_flipvals = [anchor_flipvals file.flips{1}{clique_ids(i)}];
+    anchor_ids = [anchor_ids (file.cliques{1}{cliques_ids(i)} + category_offset)];
+    anchor_flipvals = [anchor_flipvals file.flips{1}{cliques_ids(i)}];
 end
 
 end

@@ -1,7 +1,7 @@
 function [ objects ] = sim_esvm_create_dataset( frames_ids, dataset_path, dataset, flipvals)
 %Create dataset for esvm
 
-if ~exist(flipvals, 'var')
+if ~exist('flipvals', 'var')
     flipvals = false(size(frames_ids));
 end
 

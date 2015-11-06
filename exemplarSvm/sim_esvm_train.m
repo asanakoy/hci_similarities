@@ -19,6 +19,8 @@
 function [models,M] = sim_esvm_train(anchor_id, anchor_flipval, dataset, data_info, output_dir, TRAIN_DATA_FRACTION, RUN_TEST, initial_models)
 % TRAIN_DATA_FRACTION = 0.1; % fraction of data to use from each category
 
+narginchk(7, 8);
+
 ESVM_LIB_PATH = '~/workspace/exemplarsvm';
 addpath(genpath(ESVM_LIB_PATH))
 
