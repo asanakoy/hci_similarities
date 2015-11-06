@@ -34,7 +34,14 @@ for i = 1:length(frames_ids)
             objects{i}.I = fullfile(CROPS_PATHS, dataset.crops(frame_id).img_relative_path);
         else
 %             objects{i}.I = fullfile(FLIPPED_CROPS_DIR_NAME, dataset.crops(frame_id).img_relative_path);
-            objects{i}.I = fliplr(imread(fullfile(CROPS_PATHS, dataset.crops(frame_id).img_relative_path), 'png'));
+            objects{i}.I = imread(fullfile(CROPS_PATHS, dataset.crops(frame_id).img_relative_path), 'png');
+            
+            matlab_version = version('-release');
+            if (~strcmp(matlab_version(1:4), '2014'))
+                objects{i}.I = objects{i}.I(:, end:-1:1, :);
+            else
+                objects{i}.I = fliplr(objects{i}.I);
+            end
         end
 
     end
