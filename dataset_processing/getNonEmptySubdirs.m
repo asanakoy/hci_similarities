@@ -1,5 +1,6 @@
 function [dirs] = getNonEmptySubdirs(dir_path)
 % Get names of non-empty subdirs of directory dir_path
+% Max depth = 1
     dirsInfo = dir(dir_path);
     dirs = {};
     for i = 1:length(dirsInfo)

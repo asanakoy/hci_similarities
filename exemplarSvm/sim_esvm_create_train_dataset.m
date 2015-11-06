@@ -1,10 +1,10 @@
-function [ pos_objects, neg_objects ] = sim_esvm_create_train_dataset( anchor_ids, positive_category_name, ...
+function [ pos_objects, neg_objects ] = sim_esvm_create_train_dataset( anchor_ids, anchor_flipvals, positive_category_name, ...
                                                                        dataset_path, dataset, data_info, data_fraction)
 %Create train dataset (positives + pool of negatives of other categories)
 % Positive objects = achors, defined by anchor_ids
 
 % positive_category_name = '';
-pos_objects = sim_esvm_create_dataset(anchor_ids, dataset_path, dataset);
+pos_objects = sim_esvm_create_dataset(anchor_ids, dataset_path, dataset, anchor_flipvals);
 
 for i = 1:length(pos_objects)
 %     if i == 1

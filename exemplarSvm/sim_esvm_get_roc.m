@@ -26,8 +26,8 @@ path_simMatrix = ['~/workspace/OlympicSports/sim/simMatrix_', category_name, '.m
 
 figure
 color = {'r','b'};
-% model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR '-nocut']};
-model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR]}
+model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR '-nocut']};
+% model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR]}
 NMODELS = 2;
 
 for model_num = 1:NMODELS
@@ -56,8 +56,9 @@ for model_num = 1:NMODELS
             global_anchor_id = category_offset + labels(i).anchor;
             esvm_model_path = fullfile(data_info.dataset_path, ...
                 ESVM_MODELS_DIR_NAME, sprintf('%06d', global_anchor_id), ...
-                sprintf('%06d-svm-removed_top_hrd.mat', global_anchor_id))
-%                 sprintf('models/%06d-svm.mat', global_anchor_id));
+                                sprintf('models/%06d-svm.mat', global_anchor_id));
+%                 sprintf('%06d-svm-removed_top_hrd.mat', global_anchor_id))
+
 
 
             
