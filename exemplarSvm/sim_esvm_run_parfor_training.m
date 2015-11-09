@@ -22,7 +22,7 @@ parfor i = 1:length(anchor_global_ids)
     output_dir = fullfile(ESVM_MODELS_DIR, model_name);
     
     if (~isempty(getFilesInDir(output_dir, '.*svm-removed_top_hrd\.mat')) || ...
-         any(find(ismember(previously_trained.trained_model_names, model_name, 'rows'))))
+         any(find(ismember(previously_trained.trained_model_names, model_name))))
         continue;
     elseif exist(output_dir, 'dir') && isempty(getFilesInDir(output_dir, '.*svm-removed_top_hrd\.mat'))
         rmdir(output_dir, 's');

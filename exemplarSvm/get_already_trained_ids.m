@@ -3,13 +3,11 @@ function [] = get_already_trained_ids( dir_path )
 
 dir_path
 
-dir_names = getNonEmptySubdirs(dir_path);
+trained_model_names = getNonEmptySubdirs(dir_path);
 [pathstr, base_name, ext] = fileparts(dir_path);
 
-trained_model_names = cell2mat(dir_names');
-
 filePathToSave = fullfile(pathstr, [base_name ext '.mat']);
-fprintf('\nSaveng data to %s\n', filePathToSave);
+fprintf('\nSaving data to %s\n', filePathToSave);
 save(filePathToSave, '-v7.3', 'trained_model_names');
 
 end
