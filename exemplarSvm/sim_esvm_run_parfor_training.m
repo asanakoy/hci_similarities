@@ -25,7 +25,7 @@ parfor i = 1:length(anchor_global_ids)
          any(find(ismember(previously_trained.trained_model_names, model_name, 'rows'))))
         continue;
     elseif exist(output_dir, 'dir') && isempty(getFilesInDir(output_dir, '.*svm-removed_top_hrd\.mat'))
-        rmdir(output_dir);
+        rmdir(output_dir, 's');
     end
     
 %     model_file = load(fullfile(ESVM_MODELS_DIR_PREVIOUS_ROUND, ...
