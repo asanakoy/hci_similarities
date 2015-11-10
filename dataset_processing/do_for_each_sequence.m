@@ -8,7 +8,9 @@ parfor i = 1:length(categories)
     fprintf('\nCat %d / %d: \n%d.Current sequence:              ', i, i, length(categories));
     sequences = getNonEmptySubdirs(fullfile(crops_dir_path, categories{i}));
     
-    str_width = length(sprintf('%04d/%04d', length(sequences), length(sequences)));
+    str = sprintf('%04d/%04d', 0, length(sequences));
+    fprintf('%s', str);
+    str_width = length(str);
     clean_symbols = repmat('\b', 1, str_width);
     for j = 1:length(sequences)
         fprintf(clean_symbols);
