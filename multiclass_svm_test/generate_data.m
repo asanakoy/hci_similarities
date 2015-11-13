@@ -1,4 +1,4 @@
-function [ train_data, test_data ] = generate_data( settings, cliques_filepath )
+function [ train_data, cv_data, test_data ] = generate_data( settings, cliques_filepath )
 %GENERATE_DATA Summary of this function goes here
 %   Detailed explanation goes here
 validateattributes(settings, {'MulticlassSvmSettings'}, {'scalar'});
@@ -12,6 +12,9 @@ DATA_INFO = load(DatasetStructure.getDataInfoPath(settings.dataset_path));
 
 train_data.X = [];
 train_data.y = [];
+
+cv_data.X = [];
+cv_data.y = [];
 
 test_data.X = [];
 test_data.y = [];
@@ -38,12 +41,16 @@ for i = 1:length(file.cliques{1})
     end
     
     n_train = round(size(X, 1) * settings.train_fraction);
-    n_test = size(X, 1) - n_train;
+    n_cv = round(size(X, 1) * settings.cv_fraction);
+    n_test = size(X, 1) - n_train - n_cv;
     
     train_data.X = cat(1, train_data.X, X(1:n_train, :));
     train_data.y = cat(1, train_data.y, repmat(i, n_train, 1));
     
-    test_data.X = cat(1, test_data.X , X((n_train+1):end, :));
+    cv_data.X = cat(1, cv_data.X, X((n_train+1):(n_train + n_cv), :));
+    cv_data.y = cat(1, cv_data.y, repmat(i, n_cv, 1));
+    
+    test_data.X = cat(1, test_data.X , X((n_train+n_cv+1):end, :));
     test_data.y = cat(1, test_data.y, repmat(i, n_test, 1));
 end
 fprintf('\n');

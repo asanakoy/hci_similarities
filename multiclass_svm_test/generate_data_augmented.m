@@ -9,7 +9,7 @@ ESVM_NUMBER_OF_WORKERS = 2;
 file = load(data_filepath);
 
 data.X = [];
-data.y = file.new_labels';
+data.y = file.new_labels' + 1; % labels start from 0
 
 fprintf('Loading esvm models...\n');
 basis_models = load_basis_esvm_models(settings.basis_models_handles, settings.get_esvm_models_path());

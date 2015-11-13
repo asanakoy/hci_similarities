@@ -8,7 +8,9 @@ classdef MulticlassSvmSettings
         dataset_path = ''
         category_name = ''
         basis_models_handles = cell(0, 1);
-        train_fraction = 0.6
+        train_fraction = 0.4
+        cv_fraction = 0.2
+        test_fraction = 0.4
         crops_path = ''
     end
     
