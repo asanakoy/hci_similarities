@@ -26,7 +26,17 @@ else
     gamma = 0;
 end
 
-C = logspace(-9, 9, number_of_points);
+if strfind(params_format, '-c %e')   
+        C = logspace(-9, 9, number_of_points);
+    else
+        res = regexp(params_format, '-c (?<c_param>\d+\.\d+)', 'names');
+        if ~isempty(res)
+            C = str2num(res.c_param);
+        else
+            error('Specify the C!\n');
+        end
+end
+
 scores = zeros(1, length(C) * length(gamma));
 num_classes = length(unique(train_data.y));
 assert(min(train_data.y) == 1);

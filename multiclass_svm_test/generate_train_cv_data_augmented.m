@@ -27,11 +27,11 @@ for c = 1:num_classes
     n_train = round(length(indices) * train_fraction);
     
     train_indices =  indices( perm(1:n_train) );
-    train_data.X = cat(1, train_data.X, data.X(train_indices));
+    train_data.X = cat(1, train_data.X, data.X(train_indices, :));
     train_data.y = cat(1, train_data.y, data.y(train_indices));
     
     cv_indices = indices( perm((n_train+1):end) );
-    cv_data.X = cat(1, cv_data.X, data.X(cv_indices));
+    cv_data.X = cat(1, cv_data.X, data.X(cv_indices, :));
     cv_data.y = cat(1, cv_data.y, data.y(cv_indices));
     
 end
