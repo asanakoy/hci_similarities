@@ -1,7 +1,7 @@
 
 %% Raw data, probabilities
 params_format = '-c %e -t 0 -g %e -b 0 -w1 12 -q';
-train_and_test(params_format, train_data, cv_data, test_data, 100);
+train_and_test(params_format, train_data, cv_data, test_data, 50);
 
 params_format = '-c %e -t 2 -g 0.1 -b 0 -w1 12 -q';
 train_and_test(params_format, train_data, cv_data, test_data, 10);
