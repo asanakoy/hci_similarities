@@ -13,10 +13,18 @@ end
 addpath(fullfile(CAFFE_ROOT, 'matlab'));
 
 crops_path = fullfile(dataset_path, 'crops_96x96');
-pathsave = '~/workspace/OlympicSports/exemplar_cnn/features';
+
 %load images
 models = {'exemplar_cnn'};
 model = models{1};
+
+%check file existance
+pathsave = '~/workspace/OlympicSports/exemplar_cnn/features';
+file_to_save = fullfile(pathsave,[model,'_',category_name,'_Features_conv3.mat']);
+if exist(file_to_save, 'file')
+    fprintf('Skip. File %s already exists!\n', file_to_save);
+    return
+end
 
 % init network
 params.model_def_file = [HOME '/workspace/similarities/cnn/deploy_',model,'_conv3.prototxt'];
@@ -31,17 +39,20 @@ fprintf('Loading data from disk...\n');
 if ~exist('data_info', 'var')
     data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
 end
+tic;
 crops_global_info = load(DatasetStructure.getCropsGlobalInfoPath(dataset_path));
+toc
 fprintf('Calculating category offset...\n');
 category_offset = get_category_offset(category_name, data_info);
 
 category_size = 0;
 category_id = data_info.categoryLookupTable(category_offset + 1);
-while data_info.categoryLookupTable(category_offset + 1 + category_size) == category_id
+while category_offset + 1 + category_size <= data_info.totalNumberOfVectors && ...
+       data_info.categoryLookupTable(category_offset + 1 + category_size) == category_id
     category_size = category_size + 1;
 end
 
-conv3 = zeros(category_size, 1);
+conv3 = cell(category_size, 1);
 
 fprintf('Running forward propagation on %s\n', category_name);
 progress_struct = init_progress_string('Image:', category_size, 50);
@@ -64,8 +75,10 @@ for i = 1:category_size
 end
 fprintf('\n');
 
+fprintf('conv3 data size: %d x %d', size(conv3,1), size(conv3,2));
+whos conv3
 fprintf('Saving on disk...\n');
-save(fullfile(pathsave,[model,'_',category_name,'_Features_conv3.mat']),'conv3');
+save(file_to_save,'conv3');
 
 end
 

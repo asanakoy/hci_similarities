@@ -21,6 +21,10 @@ classdef DatasetStructure
             path = fullfile(dataset_path, DatasetStructure.DATA_DIR, 'dataInfo.mat');
         end
         
+        function path = getCropsGlobalInfoPath(dataset_path)
+            path = fullfile(dataset_path, DatasetStructure.DATA_DIR, 'crops_global_info.mat');
+        end
+        
         function path = getDataDirPath(dataset_path)
             if nargin < 1 || isempty(dataset_path)
                 dataset_path = DatasetStructure.DATASET_PATH;
