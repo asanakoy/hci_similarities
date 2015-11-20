@@ -116,7 +116,7 @@ for i = 1:size(hog_size,1)
     Xdiff = bsxfun(@minus, X(:), X(:)');
     Ydiff = bsxfun(@minus, Y(:), Y(:)');
     
-    Idx = (Ydiff<0) | (Ydiff==0 & Xdiff<0);
+    Idx = (Ydiff<0) | (Ydiff==0 & Xdiff<0); % merge the same displacements, ex. (-1,2) and (1, -2); (-1,0) and (1,0)
     Xdiff(Idx) = -Xdiff(Idx);
     Ydiff(Idx) = -Ydiff(Idx);
     
@@ -124,14 +124,23 @@ for i = 1:size(hog_size,1)
                 Ydiff(:), Xdiff(:), Idx(:)]);    
 end
 
+% cdbook -  unique displacements
+% IC - contains the undices that cdbook(IC) = displ(:,2:3)
 [cdbook,~,IC] = unique(displ(:,2:3),'rows');
 
-displ = cat(2,displ,IC);
+% unique displacements and their original indices
+% displ(:,1) - hog global index / image global index
+% displ(:,2) - Y displacement (1-axis)
+% displ(:,3) - X displacement (2-axis)
+% displ(:,4) - was displacement mirrored(=1) or not(=0)
+% displ(:,5) - IC. The mapping between all displacements and indices in the
+% set of unique desplacements, i.e. unique id
+displ = cat(2,displ,IC); 
 
 C = cell(size(cdbook,1),1);
 nsamples = zeros(size(cdbook,1),1);
 
-for i = 1:size(hog_size,1)
+for i = 1:size(hog_size,1)% iterate through different hog templates sizes
     
     disp(i)
 
@@ -142,9 +151,10 @@ for i = 1:size(hog_size,1)
     H = mat2cell(hogsum(i).data, repmat(K,1,M*N), repmat(K,1,M*N));
     D = displ(displ(:,1)==i, :);
     
-    for j = 1:size(cdbook,1)
+    for j = 1:size(cdbook,1) % iterate through unique displacements
         
-        idx = find(D(:,4)==0 & D(:,5)==j);
+        %  get all indices of displacements with id=j, contained tempalte #i contains
+        idx = find(D(:,4)==0 & D(:,5)==j); 
 
         if isempty(C{j})
             C{j} = zeros(K,K,'single');
@@ -154,14 +164,16 @@ for i = 1:size(hog_size,1)
             continue
         end
         
-        C{j} = C{j} + sum(cat(3,H{idx}),3);
+        C{j} = C{j} + sum(cat(3,H{idx}),3); % just add length(idx) times the covariance for j-th displacement   
+        % hogsum(i).nsamples contains number of images with the same HOG tempalte #i
         nsamples(j) = nsamples(j) + hogsum(i).nsamples * length(idx);
     end
 end
 
 
 R = cell(size(hog_size,1),1);
-
+% Build full cov matrix for each template, using precomputed civariances
+% for unique displacements C{:}
 for i = 1:size(hog_size,1)
     
     disp(i)
@@ -173,7 +185,7 @@ for i = 1:size(hog_size,1)
     D = displ(displ(:,1)==i, :);
     H = cell(length(D),1);
     
-    for j = 1:size(cdbook,1)
+    for j = 1:size(cdbook,1) % iterate through unique displacements
         idx = find(D(:,4)==0 & D(:,5)==j);
         
         if isempty(idx)
