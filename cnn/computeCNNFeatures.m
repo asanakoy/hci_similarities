@@ -23,6 +23,9 @@ pathsave = '~/workspace/OlympicSports/exemplar_cnn/features';
 file_to_save = fullfile(pathsave,[model,'_',category_name,'_Features_conv3.mat']);
 if exist(file_to_save, 'file')
     fprintf('Skip. File %s already exists!\n', file_to_save);
+    fprintf('Loading and resaving in format -v7.3\n');
+    load(file_to_save);
+    save(file_to_save, '-v7.3', 'conv3');
     return
 end
 
@@ -52,6 +55,7 @@ while category_offset + 1 + category_size <= data_info.totalNumberOfVectors && .
     category_size = category_size + 1;
 end
 
+category_size
 conv3 = cell(category_size, 1);
 
 fprintf('Running forward propagation on %s\n', category_name);
@@ -78,7 +82,7 @@ fprintf('\n');
 fprintf('conv3 data size: %d x %d', size(conv3,1), size(conv3,2));
 whos conv3
 fprintf('Saving on disk...\n');
-save(file_to_save,'conv3');
+save(file_to_save, '-v7.3', 'conv3');
 
 end
 

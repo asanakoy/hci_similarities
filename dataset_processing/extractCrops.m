@@ -1,10 +1,11 @@
 function [ ] = extractCrops()
+    addpath(genpath('/net/hciserver03/storage/asanakoy/workspace/similarities'))
 
     dataset_dir = '/net/hciserver03/storage/asanakoy/workspace/HMDB51';
     local_dataset_dir = '/export/home/asanakoy/datasets/HMDB51';
     %Extract crops from video sequences
-    BOXES_DIR_NAME = 'Boxes_INRIA';
-    clips_dir_path = fullfile(dataset_dir, 'Clips');
+    BOXES_DIR_NAME = 'boxes';
+    clips_dir_path = fullfile(dataset_dir, 'clips');
     boxes_dir_path = fullfile(dataset_dir, BOXES_DIR_NAME);
 
     categories = getNonEmptySubdirs(clips_dir_path);
@@ -17,7 +18,7 @@ function [ ] = extractCrops()
     NORMALIZED_CROP_DIAGONAL_LENGTH = 200;
 
     for i = 1:length(categories)
-        
+        fprintf('Cat %d / %d\n', i, length(categories));
         crops_cat_dir_path = fullfile(crops_dir_path, categories{i});
         clips_cat_dir_path = fullfile(clips_dir_path, categories{i});
         frames_cat_dir_path = fullfile(local_dataset_dir, FRAMES_DIR_NAME, categories{i});
@@ -30,32 +31,35 @@ function [ ] = extractCrops()
             frames_dir_path = fullfile(frames_cat_dir_path, iVideo{:}(1:end-4));
             video_path =  fullfile(clips_cat_dir_path, iVideo{:});
             boxes_filepath = fullfile(boxes_dir_path, [iVideo{:}(1:end-4) '.bb']);
-            mkdir(seq_dir_path);
+            if ~exist(seq_dir_path, 'dir')
+                mkdir(seq_dir_path);
+            end
 
             extractFramesFromVideo(video_path, frames_dir_path);
-            boxes_filepath
-            boxes = parseBoundingBoxesFile(boxes_filepath, 2:5);
+            boxes = parseBoundingBoxesFile(boxes_filepath);
 
-            cur_frame_idx = 1;
-            crops_number = 0;
-            fprintf('Cropping and resizing frames\n');
             for j = 1:length(boxes)   
                 
                 frame = imread(fullfile(frames_dir_path, sprintf('I%05d.png', j)));
-                
-                if (length(find(boxes(j, :) >= 0)) == 4)
-                    
-                    crop = imcrop(frame, boxes(j, :));
+
+                for k = 1:size(boxes{j})
+                    roi = bbox2roi(boxes{j}(k));
+                    crop = imcrop(frame, roi);
                     crop = normalizeDiagonalLength(crop, NORMALIZED_CROP_DIAGONAL_LENGTH);
-                    crop_filepath = fullfile(seq_dir_path, sprintf('I%05d.png', crops_number));
+                    crop_filepath = fullfile(seq_dir_path, sprintf('I%05d_%d.png', j, k));
                     imwrite(crop, crop_filepath);
-                    crops_number = crops_number + 1;
-                    
                 end
+
             end
         end
     end
 
+end
+
+
+%% convert drom format (xmin, ymin, xmax, ymax) to (xmin, ymin, width, height)
+function [roi] = bbox2roi(bbox)
+    roi = [bbox.xmin, bbox.ymin, bbox.xmax - bbox.xmin,  bbox.ymax - bbox.ymin];
 end
 
 % function [] = uncompressVideo(inputVideoPath, outputVideoPath)
@@ -68,10 +72,13 @@ end
 %     end
 % end
 
+%%
 function extractFramesFromVideo(video_path, output_frames_dir_path)
-    mkdir(output_frames_dir_path);
+    if ~exist(output_frames_dir_path, 'dir')
+        mkdir(output_frames_dir_path);
+    end
     cmd = sprintf('cd "%s" && ffmpeg -loglevel panic -i "%s"  -f image2 I%%5d.png', ...
-                  output_frames_dir_path, video_path)
+                  output_frames_dir_path, video_path);
     system(cmd);
 end
 
