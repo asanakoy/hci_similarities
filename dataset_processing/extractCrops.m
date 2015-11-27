@@ -1,4 +1,4 @@
-function [ ] = extractCrops()
+function [ ] = extractCrops(begin_cat, end_cat)
     addpath(genpath('/net/hciserver03/storage/asanakoy/workspace/similarities'))
 
     dataset_dir = '/net/hciserver03/storage/asanakoy/workspace/HMDB51';
@@ -12,12 +12,19 @@ function [ ] = extractCrops()
 
     close all;
 
-    CROPS_DIR_NAME = 'crops';
+    CROPS_DIR_NAME = 'crops_new';
     FRAMES_DIR_NAME = 'frames';
     crops_dir_path = fullfile(dataset_dir, CROPS_DIR_NAME);
     NORMALIZED_CROP_DIAGONAL_LENGTH = 200;
-
-    for i = 1:length(categories)
+    
+    if ~exist('begin_cat', 'var')
+        begin_cat = 1;
+    end
+    if ~exist('end_cat', 'var')
+        end_cat = length(categories);
+    end
+    
+    for i = begin_cat:end_cat
         fprintf('Cat %d / %d\n', i, length(categories));
         crops_cat_dir_path = fullfile(crops_dir_path, categories{i});
         clips_cat_dir_path = fullfile(clips_dir_path, categories{i});
@@ -35,14 +42,14 @@ function [ ] = extractCrops()
                 mkdir(seq_dir_path);
             end
 
-            extractFramesFromVideo(video_path, frames_dir_path);
+%             extractFramesFromVideo(video_path, frames_dir_path);
             boxes = parseBoundingBoxesFile(boxes_filepath);
 
             for j = 1:length(boxes)   
                 
                 frame = imread(fullfile(frames_dir_path, sprintf('I%05d.png', j)));
 
-                for k = 1:size(boxes{j})
+                for k = 1:length(boxes{j})
                     roi = bbox2roi(boxes{j}(k));
                     crop = imcrop(frame, roi);
                     crop = normalizeDiagonalLength(crop, NORMALIZED_CROP_DIAGONAL_LENGTH);

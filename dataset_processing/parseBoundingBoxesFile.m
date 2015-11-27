@@ -3,7 +3,7 @@ function [bboxes] = parseBoundingBoxesFile(filepath)
 
 %     fprintf('Reading boxes: %s\n', filepath);
     lines = textread(filepath, '', -1, 'delimiter', ' ', 'emptyvalue', NaN);
-    bboxes = cell(length(lines), 1);
+    bboxes = cell(size(lines, 1), 1);
     ncol = size(lines, 2);
     for i = 1:size(lines, 1)
         j = 2;
