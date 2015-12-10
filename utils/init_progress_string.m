@@ -12,6 +12,7 @@ progress_struct.format = sprintf(sprintf('%%%%0%dd/%%0%dd', num_width , num_widt
 progress_str = sprintf(progress_struct.format, 0);
 str_width = length(progress_str);
 progress_struct.clean_symbols = repmat('\b', 1, str_width);
+progress_struct.update_period = update_period;
 
 
 fprintf('%s %s', title, progress_str);
