@@ -1,3 +1,7 @@
+if (strcmp(version('-release'), '2012a') || strcmp(version('-release'), '2013a'))
+    fprintf('Probably matlab 2012a and 2013a is non supported\n');
+end
+
 p = gcp('nocreate'); % If no pool, then create a new one.
 if isempty(p)
     fprintf('Starting parpool with %d workers...\n', ESVM_NUMBER_OF_WORKERS);

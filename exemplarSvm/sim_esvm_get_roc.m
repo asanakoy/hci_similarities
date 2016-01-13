@@ -6,7 +6,7 @@ dataset_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports';
 PLOTS_DIR = 'plots';
 ESVM_DATA_FRACTION_STR = '0.1';
 ROUND_STR = '1';
-ESVM_MODELS_DIR_NAME = ['esvm_models_all_' ESVM_DATA_FRACTION_STR '_round' ROUND_STR];
+ESVM_MODELS_DIR_NAME = ['esvm/esvm_models_all_' ESVM_DATA_FRACTION_STR '_round' ROUND_STR];
 
 if ~exist('data_info', 'var')
     data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
@@ -17,7 +17,7 @@ end
 
 % if ~exist('labels_filepath', 'var')
 labels_filepath = sprintf(['/net/hciserver03/storage/asanakoy/workspace/'...
-                          'dataset_labeling/merged_data_27.10/labels_%s.mat'], category_name);
+                          'dataset_labeling/merged_data_12.01.16/labels_%s.mat'], category_name);
 % end
 load(labels_filepath);
 
@@ -29,6 +29,7 @@ color = {'r','b'};
 model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR '-nocut']};
 % model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR]}
 NMODELS = 2;
+sims_esvm = {};
 
 for model_num = 1:NMODELS
     if model_num == 1
@@ -37,6 +38,8 @@ for model_num = 1:NMODELS
     
     mean_x = [];
     mean_y = [];
+    x = {};
+    y = {};
     
     for i = 1:length(labels)
         
@@ -56,18 +59,20 @@ for model_num = 1:NMODELS
             global_anchor_id = category_offset + labels(i).anchor;
             esvm_model_path = fullfile(data_info.dataset_path, ...
                 ESVM_MODELS_DIR_NAME, sprintf('%06d', global_anchor_id), ...
-                                sprintf('models/%06d-svm.mat', global_anchor_id));
+                                sprintf('%06d-svm.mat', global_anchor_id));
 %                 sprintf('%06d-svm-removed_top_hrd.mat', global_anchor_id))
 
 
 
             
             if ~exist(esvm_model_path, 'file')
-                fprintf('WARNING! No model. Skipping label.\n');
+                fprintf('WARNING! No model %s. Skipping label.\n', esvm_model_path);
+                sims = []
                 continue;
             end
             
             sims = getEsvmScores(labels(i), category_offset, data_info, esvm_model_path);
+            sims_esvm{i} = sims;
             
         end
         
@@ -81,19 +86,22 @@ for model_num = 1:NMODELS
 %             x{i} = x{i} + 0.02;
 %         end
     end
-    
-    mean_x = linspace(0, 1, 100);
-    for i = 1:length(x)
-        if length(x{i}) < 1
-            continue
+    if ~isempty(x)
+        mean_x = linspace(0, 1, 100);
+        for i = 1:length(x)
+            if length(x{i}) < 1
+                continue
+            end
+            [new_x, idx] = unique(x{i});
+            mean_y(i,:) = interp1(new_x, y{i}(idx), mean_x);
         end
-        [new_x, idx] = unique(x{i});
-        mean_y(i,:) = interp1(new_x, y{i}(idx), mean_x);
+
+        plot(mean_x, mean(mean_y, 1), color{model_num})
+        auc(model_num) = trapz(mean_x, mean(mean_y, 1));
+        hold on
+    else
+        auc(model_num) = 0.0;
     end
-    
-    plot(mean_x, mean(mean_y, 1), color{model_num})
-    auc(model_num) = trapz(mean_x, mean(mean_y, 1));
-    hold on
 end
 
 legend(model_name);
@@ -109,6 +117,9 @@ for i = 1:NMODELS
     fprintf('%s-auc:\t %d\n', model_name{i}, auc(i));
 end
 fclose(fileID);
+
+save(fullfile(dataset_path, PLOTS_DIR, sprintf('sims_%s_%s.mat', ...
+                     category_name, model_name{2})), 'sims_esvm');
 
 end
 
