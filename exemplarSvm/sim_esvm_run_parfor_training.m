@@ -35,6 +35,6 @@ parfor i = 1:length(anchor_global_ids)
 %     model_file = load(fullfile(ESVM_MODELS_DIR_PREVIOUS_ROUND, ...
 %         sprintf('%06d', frame_id), 'models', sprintf('%06d-svm.mat', frame_id)));
 % 
-%     sim_esvm_train(frame_id, dataset, data_info, output_dir, TRAIN_DATA_FRACTION, RUN_TEST, model_file.models);
-    sim_esvm_train(frame_id, anchor_flipvals(i), dataset, data_info, output_dir, TRAIN_DATA_FRACTION, RUN_TEST);
+%     sim_esvm_train(frame_id, dataset, data_info, output_dir, esvm_train_params, model_file.models);
+    sim_esvm_train(frame_id, anchor_flipvals(i), dataset, data_info, output_dir, esvm_train_params);
 end

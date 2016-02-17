@@ -14,7 +14,7 @@ end
 if ~exist('dataset', 'var')
     tic;
     fprintf('Reading dataset file...\n');
-    if ESVM_USE_IMAGE_PATHES
+    if esvm_train_params.use_image_pathes
         CROPS_ARRAY_FILEPATH = fullfile(DatasetStructure.getDataDirPath(dataset_path), 'crops_global_info.mat');
     else
         CROPS_ARRAY_FILEPATH = fullfile(DatasetStructure.getDataDirPath(dataset_path), 'crops_227x227.mat');

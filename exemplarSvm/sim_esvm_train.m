@@ -16,17 +16,16 @@
 % define the positive bounding boxes.  The learned Exemplar-SVMs
 % plus the calibration M-matrix are first learned, then applied to
 % a testing set of images along with the top detections.
-function [models,M] = sim_esvm_train(anchor_id, anchor_flipval, dataset, data_info, output_dir, TRAIN_DATA_FRACTION, RUN_TEST, initial_models)
-% TRAIN_DATA_FRACTION = 0.1; % fraction of data to use from each category
+function [models,M] = sim_esvm_train(anchor_id, anchor_flipval, dataset, data_info, output_dir, ...
+                                     esvm_train_params, initial_models)
 
-narginchk(7, 8);
+narginchk(6, 7);
 
 ESVM_LIB_PATH = '~/workspace/exemplarsvm';
 addpath(genpath(ESVM_LIB_PATH))
 
 dataset_path = '~/workspace/OlympicSports';
-% dataset_path = '/net/hciserver03/storage/asanakoy/workspace_copy_22.10.15/OlympicSports';
-
+create_train_data_params.use_cnn_features = esvm_train_params.use_cnn_features;
 
 if ~exist('dataset', 'var')
     tic;
@@ -40,8 +39,29 @@ if ~exist('data_info', 'var')
     data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
 end
 
-if ~exist('RUN_TEST', 'var')
-    RUN_TEST = 0;
+if ~isfield(esvm_train_params, 'should_run_test')
+    esvm_train_params.should_run_test = 0;
+end
+
+category_name = data_info.categoryNames{data_info.categoryLookupTable(anchor_id)};
+
+create_train_data_params.positive_category_name = category_name;
+create_train_data_params.dataset_path = dataset_path;
+create_train_data_params.dataset = dataset;
+create_train_data_params.data_info = data_info;
+create_train_data_params.data_fraction = esvm_train_params.train_data_fraction;
+
+if esvm_train_params.use_cnn_features
+    create_train_data_params.features_path = esvm_train_params.cnn_features_path;
+    assert(exist(create_train_data_params.features_path, 'file') ~= 0, ...
+            'File %s is not found', create_train_data_params.features_path);
+    
+    create_train_data_params.features_data = load(create_train_data_params.features_path, 'features', 'features_flip');
+    
+    assert(isfield(create_train_data_params.features_data, 'features'));
+    assert(isfield(create_train_data_params.features_data, 'features_flip'));
+    
+    create_train_data_params.category_offset = get_category_offset(category_name, data_info);
 end
 
 start_train = tic;
@@ -57,8 +77,7 @@ if anchor_flipval
     model_name = [model_name '_flipped'];
 end
 
-category_name = data_info.categoryNames{data_info.categoryLookupTable(anchor_id)};
-[pos_set, neg_set] = sim_esvm_create_train_dataset(anchor_ids, anchor_flipvals, category_name, dataset_path, dataset, data_info, TRAIN_DATA_FRACTION);
+[pos_set, neg_set] = sim_esvm_create_train_dataset(anchor_ids, anchor_flipvals, create_train_data_params);
 
 
 
@@ -66,6 +85,12 @@ category_name = data_info.categoryNames{data_info.categoryLookupTable(anchor_id)
 params = sim_esvm_get_default_params;
 %if localdir is not set, we do not dump files
 params.dataset_params.localdir = output_dir;
+
+if esvm_train_params.use_cnn_features
+    params.features_type = 'FeatureVector';
+    params.init_params.features_type = params.features_type;
+    params.init_params.features = @sim_esvm_cnnfeatures; 
+end
 
 %%Initialize exemplar stream
 stream_params.stream_set_name = 'trainval';
@@ -138,7 +163,9 @@ models = remove_top_hardest_negatives(models, neg_set);
 M = [];
 fprintf('Elapsed time fot ESVM training: %.2f seconds\n', toc(start_train));
 
-if RUN_TEST
+if esvm_train_params.should_run_test
+    assert(~strcmp(params.features_type, 'FeatureVector'), 'Not implemented for features_type: FeatureVector');
+    
     fprintf('Press Enter to start testing');
 %     pause;
 

@@ -26,6 +26,11 @@ params.detect_exemplar_nms_os_threshold = 1.0; % non-maximum supression on
 %that fall above this threshold.
 params.detect_keep_threshold = -1.2;
 
+params.features_type = 'HOG-like'; % ['FeatureVector' | 'HOG-like']
+
+params.init_params.features_type = params.features_type;
+params.init_params.features = @esvm_features;
+
 params.init_params.sbin = 8; % HOG cell size
 params.init_params.MAXDIM = 28; % DOES not affect, as we have only one scale = 1.0
 params.model_type = 'exemplar';

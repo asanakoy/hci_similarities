@@ -24,5 +24,5 @@ for i = 1:length(anchor_global_ids)
         continue;
     end
 
-    sim_esvm_train(frame_id, anchor_flipvals(i), dataset, data_info, output_dir, TRAIN_DATA_FRACTION, RUN_TEST);
+    sim_esvm_train(frame_id, anchor_flipvals(i), dataset, data_info, output_dir, esvm_train_params);
 end
