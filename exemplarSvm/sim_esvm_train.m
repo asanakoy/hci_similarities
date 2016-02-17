@@ -16,11 +16,11 @@
 % define the positive bounding boxes.  The learned Exemplar-SVMs
 % plus the calibration M-matrix are first learned, then applied to
 % a testing set of images along with the top detections.
-function [models,M] = sim_esvm_train(anchor_id, anchor_flipval, dataset, data_info, output_dir, ...
+function [models, M] = sim_esvm_train(anchor_id, anchor_flipval, dataset, data_info, output_dir, ...
                                      esvm_train_params, initial_models)
 
 narginchk(6, 7);
-
+fprintf('->sim_esvm_train ...\n')
 ESVM_LIB_PATH = '~/workspace/exemplarsvm';
 addpath(genpath(ESVM_LIB_PATH))
 
@@ -52,16 +52,20 @@ create_train_data_params.data_info = data_info;
 create_train_data_params.data_fraction = esvm_train_params.train_data_fraction;
 
 if esvm_train_params.use_cnn_features
-    create_train_data_params.features_path = esvm_train_params.cnn_features_path;
-    assert(exist(create_train_data_params.features_path, 'file') ~= 0, ...
-            'File %s is not found', create_train_data_params.features_path);
-    
-    create_train_data_params.features_data = load(create_train_data_params.features_path, 'features', 'features_flip');
-    
+    if isfield(esvm_train_params, 'features_data')
+        create_train_data_params.features_data = esvm_train_params.features_data;
+        esvm_train_params = rmfield(esvm_train_params, 'features_data'); % remove data
+    else
+        fprintf('Loading features...\n');
+        create_train_data_params.features_path = esvm_train_params.cnn_features_path;
+        assert(exist(create_train_data_params.features_path, 'file') ~= 0, ...
+                'File %s is not found', create_train_data_params.features_path);
+        create_train_data_params.features_data = load(create_train_data_params.features_path, 'features', 'features_flip');
+    end
     assert(isfield(create_train_data_params.features_data, 'features'));
     assert(isfield(create_train_data_params.features_data, 'features_flip'));
-    
-    create_train_data_params.category_offset = get_category_offset(category_name, data_info);
+
+%     create_train_data_params.category_offset = get_category_offset(category_name, data_info);
 end
 
 start_train = tic;

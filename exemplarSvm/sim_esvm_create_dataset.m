@@ -47,8 +47,9 @@ for i = 1:length(frames_ids)
     objects{i}.I.id = frame_id;
     objects{i}.I.flipval = flipvals(i);
     if params.use_cnn_features
-        assert(isfield(params, 'category_offset') && isfield(params, 'features_data'));
-        assert(frame_id <= size(params.features_data.features, 1), 'frame_id %d is out of bounds', frame_id);
+        assert(isfield(params, 'features_data'));
+        assert(frame_id <= size(params.features_data.features, 1), ...
+            'frame_id %d is out of bounds. Max feature index is: %d', frame_id, size(params.features_data.features, 1));
         if ~flipvals(i)
             objects{i}.I.feature = params.features_data.features(frame_id);
         else
