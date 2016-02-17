@@ -1,4 +1,6 @@
 function [basis_models] = load_basis_esvm_models(basis_models_handles, esvm_models_path)
+% Load from disk specified ESVM models, concatenation of the outputs of 
+% which will be used as feature vectors 
 
     basis_models = cell(1, length(basis_models_handles));
     

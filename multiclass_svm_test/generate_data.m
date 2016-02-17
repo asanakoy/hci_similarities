@@ -1,6 +1,8 @@
 function [ train_data, cv_data, test_data ] = generate_data( settings, cliques_filepath )
-%GENERATE_DATA Summary of this function goes here
-%   Detailed explanation goes here
+%GENERATE_DATA 
+% For each image create feature vector - vector of output scores of
+% len(settings.basis_models_handles) ESVM output scores.
+
 validateattributes(settings, {'MulticlassSvmSettings'}, {'scalar'});
 
 file = load(cliques_filepath);

@@ -6,6 +6,7 @@ DATASET_PATH = '~/workspace/OlympicSports/';
 CATEGORY_NAME = 'long_jump';
 
 CLIQUES_FILEPATH = fullfile(MULTICLASS_SVM_DIR, 'data/13_1_cliques_long_jump.mat');
+% Path to fle containing ids of basis anchors
 GLOBAL_ANCHORS_FILEPATH = fullfile(MULTICLASS_SVM_DIR, 'data/100_30_cliques_long_jump_Global_anchors.mat');
 
 TRAIN_DATA_AUG_FILEPATH = fullfile(MULTICLASS_SVM_DIR, 'data_augmented/held_back_13_cliques_train.mat');
@@ -25,6 +26,7 @@ settings = MulticlassSvmSettings(DATASET_PATH, basis_models_handles, CATEGORY_NA
 
 
 %% data without augmentation
+% Feature vector - vector of scores of basis ESMVs
 train_cv_test_data_path = fullfile(MULTICLASS_SVM_DIR, 'data.mat');
 if ~exist('train_data', 'var') || ~exist('test_data', 'var') || ~exist('cv_data', 'var')
     if exist(train_cv_test_data_path, 'file')
@@ -40,7 +42,7 @@ end
 
 
 %% data from cnn layer
-
+% Feature vector - output of Alexnet fc7 layer.
 train_cv_test_data_cnn_path = fullfile(MULTICLASS_SVM_DIR, 'data_cnn.mat');
 if ~exist('train_data_cnn', 'var') || ~exist('test_data_cnn', 'var') || ~exist('cv_data_cnn', 'var')
     if exist(train_cv_test_data_cnn_path, 'file')
@@ -57,6 +59,7 @@ else
 end
 
 %% data with augmentation
+% Feature vector - vector of scores of basis ESMVs. Using augmented data.
 tic;
 train_cv_test_data_aug_path = fullfile(MULTICLASS_SVM_DIR, 'data_aug.mat');
 if ~exist('train_data_aug', 'var') || ~exist('test_data_aug', 'var') || ~exist('cv_data_aug', 'var')
