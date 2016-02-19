@@ -94,6 +94,8 @@ if esvm_train_params.use_cnn_features
     params.features_type = 'FeatureVector';
     params.init_params.features_type = params.features_type;
     params.init_params.features = @sim_esvm_cnnfeatures; 
+    params.dataset_params.display = 0; % display is not implemented for FeatureVector
+    params.dump_images = 0; % dump_images is not implemented for FeatureVector
 end
 
 %%Initialize exemplar stream
@@ -224,7 +226,9 @@ function [models] = remove_top_hardest_negatives(models, neg_set)
         models{i}.mining_stats{cur_iter}.num_violating = 0;
         models{i}.mining_stats{cur_iter}.total_mines = 0;
         models{i}.mining_stats{cur_iter}.comment = sprintf('cutted_%.2f_top_hard_neg', PART_OF_NEGATIVES_TO_REMOVE);
-        esvm_dump_figures(models{i}, neg_set);
+        if models{1}.mining_params.dump_images == 1
+            esvm_dump_figures(models{i}, neg_set);
+        end
     end
         filer2 = fullfile(models{i}.dataset_params.localdir, [models{i}.models_name '-removed_top_hrd.mat']);
 %         %Save the result

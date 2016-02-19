@@ -2,6 +2,7 @@ function [ objects ] = sim_esvm_create_dataset( frames_ids, params, flipvals)
 %Create dataset for esvm
 
 if ~exist('flipvals', 'var')
+%     assert(false, 'WARNING. NO FLIPS!')
     flipvals = false(size(frames_ids));
 end
 
@@ -51,9 +52,12 @@ for i = 1:length(frames_ids)
         assert(frame_id <= size(params.features_data.features, 1), ...
             'frame_id %d is out of bounds. Max feature index is: %d', frame_id, size(params.features_data.features, 1));
         if ~flipvals(i)
-            objects{i}.I.feature = params.features_data.features(frame_id);
+            objects{i}.I.feature = params.features_data.features(frame_id, :)';
+            objects{i}.I.feature_flipped = params.features_data.features_flip(frame_id, :)';
         else
-            objects{i}.I.feature = params.features_data.features_flip(frame_id);
+            % WARNING: should be ised only for Exemlpars! Negatives must be
+            % flipped on-line during running ESVM training.
+            objects{i}.I.feature = params.features_data.features_flip(frame_id, :)';
         end
     end
     

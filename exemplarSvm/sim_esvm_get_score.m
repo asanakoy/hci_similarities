@@ -14,7 +14,7 @@ params.detect_keep_threshold = -1e9; % keep all detections
 
 I = im2double(I); % because ESVM lib deals with double images
 [resstruct, ~] = esvm_detect(I, model, params);
-score = max(resstruct.bbs{1}(:, end));
+score = max(resstruct.bbs{1}(:, 12));
 
 end
 

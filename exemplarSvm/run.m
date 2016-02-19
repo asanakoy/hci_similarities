@@ -9,7 +9,6 @@ labels_dir_path = '~/workspace/dataset_labeling/labels_to_train';
 % CATEGORY_NAME = 'long_jump';
 % [anchor_global_ids, anchor_flipvals] = get_global_anchors_from_cliques_file(data_info, CATEGORY_NAME, CLIQUES_FILE_PATH);
 
-
 for i = 1:length(anchor_global_ids)
     frame_id = anchor_global_ids(i);
     fprintf('----Anchor %d\n', frame_id);

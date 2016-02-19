@@ -5,6 +5,7 @@ function [ params ] = sim_esvm_get_default_params
 params = esvm_get_default_params;
 params.detect_max_scale = 1.0;
 params.detect_min_scale = 1.0;
+params.detect_add_flip = 1;
 params.init_params.detect_max_scale = params.detect_max_scale;
 params.init_params.detect_min_scale = params.detect_min_scale;
 %Levels-per-octave defines how many levels between 2x sizes in pyramid
@@ -36,7 +37,7 @@ params.init_params.MAXDIM = 28; % DOES not affect, as we have only one scale = 1
 params.model_type = 'exemplar';
 
 %enable display so that nice visualizations pop up during learning
-params.dataset_params.display = 1;
+params.dataset_params.display = 0;
 
 %if localdir is not set, we do not dump files
 params.dataset_params.localdir = '';
