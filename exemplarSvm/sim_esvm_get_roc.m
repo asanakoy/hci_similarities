@@ -1,12 +1,42 @@
-function [] = sim_esvm_get_roc( category_name )
+function [] = sim_esvm_get_roc(category_name, esvm_params)
 %GETROC Summary of this function goes here
 %   Detailed explanation goes here
+addpath(genpath('~/workspace/similarities'))
+addpath(genpath('~/workspace/exemplarsvm'))
 
 dataset_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports';
 PLOTS_DIR = 'plots';
 ESVM_DATA_FRACTION_STR = '0.1';
 ROUND_STR = '1';
 ESVM_MODELS_DIR_NAME = ['esvm/esvm_models_all_' ESVM_DATA_FRACTION_STR '_round' ROUND_STR];
+
+if ~exist('esvm_params', 'var')
+    esvm_params.use_cnn_features = 0;% ESVM Uses CNN features or HOG.
+    esvm_params.cnn_features_path = ... % used only if use_cnn_features = 1
+        '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7.mat';
+    esvm_params.esvm_crops_dir_name = 'crops_227x227';
+end
+
+% Load features into memory
+if esvm_params.use_cnn_features && ~isfield(esvm_params, 'features_data')
+    tic;
+    fprintf('Reading CNN features file...\n');
+    assert(exist(esvm_params.cnn_features_path, 'file') ~= 0, ...
+                'File %s is not found', esvm_params.cnn_features_path);
+    esvm_params.features_data = load(esvm_params.cnn_features_path, 'features', 'features_flip');
+    toc
+end
+
+if ~isfield(esvm_params, 'model_params')
+    esvm_params.model_params = sim_esvm_get_default_params;
+    if esvm_params.use_cnn_features
+        esvm_params.model_params.features_type = 'FeatureVector';
+        ESVM_MODELS_DIR_NAME = 'esvm/alexnet_esvm_models_long_jump';
+    else
+        esvm_params.model_params.features_type = 'HOG-like';
+    end
+end
+
 
 if ~exist('data_info', 'var')
     data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
@@ -17,7 +47,7 @@ end
 
 % if ~exist('labels_filepath', 'var')
 labels_filepath = sprintf(['/net/hciserver03/storage/asanakoy/workspace/'...
-                          'dataset_labeling/merged_data_12.01.16/labels_%s.mat'], category_name);
+                          'dataset_labeling/merged_data_19.02.16/labels_%s.mat'], category_name);
 % end
 load(labels_filepath);
 
@@ -71,7 +101,7 @@ for model_num = 1:NMODELS
                 continue;
             end
             
-            sims = getEsvmScores(labels(i), category_offset, data_info, esvm_model_path);
+            sims = getEsvmScores(labels(i), category_offset, data_info, esvm_model_path, esvm_params);
             sims_esvm{i} = sims;
             
         end
@@ -124,9 +154,7 @@ save(fullfile(dataset_path, PLOTS_DIR, sprintf('sims_%s_%s.mat', ...
 end
 
 
-function scores = getEsvmScores(label, category_offset, data_info, esvm_model_path)
-ESVM_CROPS_DIR_NAME = 'crops_227x227';
-
+function scores = getEsvmScores(label, category_offset, data_info, esvm_model_path, esvm_params)
 esvm_file = load(esvm_model_path);
 
 scores = zeros(1, length(label.positives.ids) + length(label.negatives.ids));
@@ -137,14 +165,37 @@ flipval = [label.positives.flipval label.negatives.flipval];
 for i = 1:length(ids)
     frame_id = category_offset + ids(i);
     
-    image_info = get_image_info(frame_id, data_info, ESVM_CROPS_DIR_NAME);
-    im = imread(image_info.absolute_path);
-    if (flipval(i))
-        im = fliplr(im);
-    end
-    scores(i) = sim_esvm_get_score(im, esvm_file.models(1));
+    sample = createEsvmSample(frame_id, flipval(i), data_info, esvm_params);
+   
+    scores(i) = sim_esvm_get_score(sample, esvm_file.models(1), esvm_params.model_params);
     fprintf('ESVM::Detected img %d, score: %f\n', frame_id, scores(i));
 end
 
 end
 
+function sample = createEsvmSample(frame_id, flipval, data_info, esvm_params)
+% If use_cnn_features == 1 return ImageStruct.
+%   ImageStruct fields:
+%                       id - image id,
+%                       flipval - 1 if it is flipped, 0 - otherwise, 
+%                       feature - feature representation of the
+%                                           image.
+%
+% If use_cnn_features == 0 return RGB image.
+
+    if esvm_params.use_cnn_features == 0
+        image_info = get_image_info(frame_id, data_info, esvm_params.esvm_crops_dir_name);
+        im = imread(image_info.absolute_path);
+        if flipval
+            im = fliplr(im);
+        end
+        sample = im;
+    else
+        sample.id = frame_id;
+        if ~flipval
+            sample.feature = esvm_params.features_data.features(frame_id, :)';
+        else
+            sample.feature = esvm_params.features_data.features_flip(frame_id, :)';
+        end
+    end
+end

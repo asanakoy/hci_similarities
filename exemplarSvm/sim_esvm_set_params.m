@@ -11,4 +11,4 @@ esvm_train_params.should_run_test = 0; % Run test for esvm (together with visual
 esvm_train_params.train_data_fraction = 0.1; % Portion of data to use for negative mining.
 ESVM_MODELS_DIR = '~/workspace/OlympicSports/esvm/alexnet_esvm_models_output'; % Output dir.
 
-ESVM_NUMBER_OF_WORKERS = 2;
+ESVM_NUMBER_OF_WORKERS = 1;
