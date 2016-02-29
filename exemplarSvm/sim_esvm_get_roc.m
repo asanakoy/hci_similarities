@@ -10,9 +10,11 @@ ESVM_DATA_FRACTION_STR = '0.1';
 ROUND_STR = '1';
 ESVM_MODELS_DIR_NAME = ['esvm/esvm_models_all_' ESVM_DATA_FRACTION_STR '_round' ROUND_STR];
 
+% TODO: check that esvm_params are filled and used in a proper way.
+
 if ~exist('esvm_params', 'var')
     esvm_params.use_cnn_features = 0;% ESVM Uses CNN features or HOG.
-    esvm_params.cnn_features_path = ... % used only if use_cnn_features = 1
+    esvm_params.features_path = ... % used only if use_cnn_features = 1
         '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7.mat';
     esvm_params.esvm_crops_dir_name = 'crops_227x227';
 end
@@ -21,9 +23,9 @@ end
 if esvm_params.use_cnn_features && ~isfield(esvm_params, 'features_data')
     tic;
     fprintf('Reading CNN features file...\n');
-    assert(exist(esvm_params.cnn_features_path, 'file') ~= 0, ...
-                'File %s is not found', esvm_params.cnn_features_path);
-    esvm_params.features_data = load(esvm_params.cnn_features_path, 'features', 'features_flip');
+    assert(exist(esvm_params.features_path, 'file') ~= 0, ...
+                'File %s is not found', esvm_params.features_path);
+    esvm_params.features_data = load(esvm_params.features_path, 'features', 'features_flip');
     toc
 end
 

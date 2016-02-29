@@ -1,4 +1,4 @@
-function x = esvm_cnnfeatures(I, params)
+function x = cnnfeatures(I, params)
 %Return the CNN FC7 feature function, same as esvm_features
 
 assert(iastruct(I));

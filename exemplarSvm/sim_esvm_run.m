@@ -15,5 +15,6 @@ for i = 1:length(anchor_global_ids)
         rmdir(output_dir, 's');
     end
     
-    sim_esvm_train(frame_id, anchor_flipvals(i), dataset, data_info, output_dir, esvm_train_params);
+    assert(anchor_flipvals(i) == 0);
+    sim_esvm.train(frame_id, anchor_flipvals(i), output_dir, esvm_train_params);
 end

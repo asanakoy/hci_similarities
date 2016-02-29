@@ -1,15 +1,15 @@
-function [ objects ] = sim_esvm_create_dataset( frames_ids, params, flipvals)
+function [ objects ] = create_dataset( frames_ids, params, flipvals)
 %Create dataset for esvm
 
 if ~exist('flipvals', 'var')
-%     assert(false, 'WARNING. NO FLIPS!')
-    flipvals = false(size(frames_ids));
+    error('NO FLIPS specified!');
 end
+
 
 IMAGE_SIZE = [227 227];
 CROPS_DIR_NAME = 'crops_227x227';
 FLIPPED_CROPS_DIR_NAME = 'crops_227x227-flipped';
-CROPS_PATHS = fullfile(params.dataset_path, CROPS_DIR_NAME);
+CROPS_PATHS = fullfile(params.crops_global_info.path, CROPS_DIR_NAME);
 
 objects = cell(1, length(frames_ids));
 
@@ -24,17 +24,17 @@ for i = 1:length(frames_ids)
     end
     
     frame_id = frames_ids(i);
-    if (isfield(params.dataset.crops(frame_id), 'img'))
-        objects{i}.I.img = params.dataset.crops(frame_id).img;
+    if (isfield(params.crops_global_info.crops(frame_id), 'img'))
+        objects{i}.I.img = params.crops_global_info.crops(frame_id).img;
         if (flipvals(i))
             objects{i}.I.img = fliplr(objects{i}.I);
         end
     else
         if (~flipvals(i))
-            objects{i}.I.img = fullfile(CROPS_PATHS, params.dataset.crops(frame_id).img_relative_path);
+            objects{i}.I.img = fullfile(CROPS_PATHS, params.crops_global_info.crops(frame_id).img_relative_path);
         else
-%             objects{i}.I = fullfile(FLIPPED_CROPS_DIR_NAME, params.dataset.crops(frame_id).img_relative_path);
-            objects{i}.I.img = imread(fullfile(CROPS_PATHS, params.dataset.crops(frame_id).img_relative_path), 'png');
+%             objects{i}.I = fullfile(FLIPPED_CROPS_DIR_NAME, params.crops_global_info.crops(frame_id).img_relative_path);
+            objects{i}.I.img = imread(fullfile(CROPS_PATHS, params.crops_global_info.crops(frame_id).img_relative_path), 'png');
             
             matlab_version = version('-release');
             if (~strcmp(matlab_version(1:4), '2014'))
@@ -57,15 +57,17 @@ for i = 1:length(frames_ids)
         else
             % WARNING: should be ised only for Exemlpars! Negatives must be
             % flipped on-line during running ESVM training.
+            % Note: actualy right now we don't support flipped exempalrs.
+            assert(false, 'actualy right now we don''t support flipped exempalrs');
             objects{i}.I.feature = params.features_data.features_flip(frame_id, :)';
         end
     end
     
     objects{i}.recs.imgsize = IMAGE_SIZE;
-    objects{i}.recs.cname = params.dataset.crops(frame_id).cname;
+    objects{i}.recs.cname = params.crops_global_info.crops(frame_id).cname;
     objects{i}.recs.objects(1).frame_id = frame_id;
     objects{i}.recs.objects(1).flipval = flipvals(i);
-    objects{i}.recs.objects(1).class = params.dataset.crops(frame_id).cname;
+    objects{i}.recs.objects(1).class = params.crops_global_info.crops(frame_id).cname;
     objects{i}.recs.objects(1).bbox = [ 1 1 IMAGE_SIZE];
     objects{i}.recs.objects(1).difficult = 0;
 end

@@ -1,92 +1,44 @@
-% DEMO: Training Exemplar-SVMs from synthetic data
-% This function can generate a nice HTML page by calling: 
-% publish('esvm_demo_train_synthetic.m','html')
+% Train Exemplar-SVMs
+% 
+% If ypu want to train useing CNN_FEATURES, you need to load features in
+% memory before running training.
 %
-% Copyright (C) 2011-12 by Tomasz Malisiewicz
+% Copyright (C) 2015-16 by Artsiom Sanakoyeu
 % All rights reserved. 
-%
-% This file is part of the Exemplar-SVM library and is made
-% available under the terms of the MIT license (see COPYING file).
-% Project homepage: https://github.com/quantombone/exemplarsvm
-%
-% In this demo, I create a random dataset of circular patterns on a
-% random background of noise with extra noise sprinkled on top.
-% Because the circles are synthetically generated, we have access
-% to ground-truth locations of those circles and these are used to
-% define the positive bounding boxes.  The learned Exemplar-SVMs
-% plus the calibration M-matrix are first learned, then applied to
-% a testing set of images along with the top detections.
-function [models, M] = sim_esvm_train(anchor_id, anchor_flipval, dataset, data_info, output_dir, ...
+function [models, M] = train(anchor_id, anchor_flipval, output_dir, ...
                                      esvm_train_params, initial_models)
 
-narginchk(6, 7);
-fprintf('->sim_esvm_train ...\n')
-ESVM_LIB_PATH = '~/workspace/exemplarsvm';
-addpath(genpath(ESVM_LIB_PATH))
+narginchk(4, 5);
+check_esvm_train_params(esvm_train_params);
 
-dataset_path = '~/workspace/OlympicSports';
-create_train_data_params.use_cnn_features = esvm_train_params.use_cnn_features;
-
-if ~exist('dataset', 'var')
-    tic;
-    fprintf('Opening crops global info file...\n');
-    CROPS_ARRAY_FILEPATH = fullfile(DatasetStructure.getDataDirPath(dataset_path), 'crops_global_info.mat');
-    dataset = load(CROPS_ARRAY_FILEPATH);
-    toc
-end
-
-if ~exist('data_info', 'var')
-    data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
-end
-
-if ~isfield(esvm_train_params, 'should_run_test')
-    esvm_train_params.should_run_test = 0;
-end
+data_info = esvm_train_params.create_data_params.data_info;
 
 category_name = data_info.categoryNames{data_info.categoryLookupTable(anchor_id)};
+esvm_train_params.create_data_params.positive_category_name = category_name;
 
-create_train_data_params.positive_category_name = category_name;
-create_train_data_params.dataset_path = dataset_path;
-create_train_data_params.dataset = dataset;
-create_train_data_params.data_info = data_info;
-create_train_data_params.data_fraction = esvm_train_params.train_data_fraction;
 
-if esvm_train_params.use_cnn_features
-    if isfield(esvm_train_params, 'features_data')
-        create_train_data_params.features_data = esvm_train_params.features_data;
-        esvm_train_params = rmfield(esvm_train_params, 'features_data'); % remove data
-    else
-        fprintf('Loading features...\n');
-        create_train_data_params.features_path = esvm_train_params.cnn_features_path;
-        assert(exist(create_train_data_params.features_path, 'file') ~= 0, ...
-                'File %s is not found', create_train_data_params.features_path);
-        create_train_data_params.features_data = load(create_train_data_params.features_path, 'features', 'features_flip');
-    end
-    assert(isfield(create_train_data_params.features_data, 'features'));
-    assert(isfield(create_train_data_params.features_data, 'features_flip'));
-
-%     create_train_data_params.category_offset = get_category_offset(category_name, data_info);
-end
-
-start_train = tic;
+fprintf('->sim_esvm.train ...\n')
 %% Create a synthetic dataset of circles on a random background
 % The resulting images are also corrupted with noise to provide a
 % more difficult case.  Negative images are random noise images
 % without any circular pattern.
 % Npos = 100; Nneg = 50; [pos_set,neg_set] = esvm_generate_dataset(Npos,Nneg);
+start_train = tic;
 anchor_ids = [anchor_id];
 anchor_flipvals = [anchor_flipval];
+assert(all(anchor_flipvals == 0), 'Anchor flipval is not zero!');
+
 model_name = sprintf('%06d', anchor_ids(1)); % category name
 if anchor_flipval
     model_name = [model_name '_flipped'];
 end
 
-[pos_set, neg_set] = sim_esvm_create_train_dataset(anchor_ids, anchor_flipvals, create_train_data_params);
+[pos_set, neg_set] = sim_esvm.create_train_dataset(anchor_ids, anchor_flipvals, esvm_train_params.create_data_params);
 
 
 
 %% Set exemplar-initialization parameters
-params = sim_esvm_get_default_params;
+params = sim_esvm.get_default_params;
 %if localdir is not set, we do not dump files
 params.dataset_params.localdir = output_dir;
 
@@ -182,7 +134,8 @@ if esvm_train_params.should_run_test
     test_images_ids = test_images_ids(1:1000);
     % TODO filter self
 
-    test_set = sim_esvm_create_dataset(test_images_ids, dataset_path, dataset);
+    test_set = sim_esvm.create_dataset(test_images_ids, ...
+        false(size(test_images_ids)), esvm_train_params.create_data_params);
     test_params = params;
     % test_params.detect_exemplar_nms_os_threshold = 0.1;
     test_set_name = 'testset';

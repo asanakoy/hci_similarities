@@ -1,5 +1,5 @@
-function [ params ] = sim_esvm_get_default_params
-%SIM_ESVM_GET_DEFAULT_PARAMS Returns default params for ESVM
+function [ params ] = get_default_params
+%GET_DEFAULT_PARAMS Returns default params for ESVM
 
 %% Set exemplar-initialization parameters
 params = esvm_get_default_params;
