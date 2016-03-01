@@ -72,8 +72,7 @@ end
 if strcmp(create_data_params.create_negatives_policy, 'negative_cliques')
     assert(exist(esvm_train_params.cliques_data_path, 'file') ~= 0, ...
         'File %s is not found', esvm_train_params.cliques_data_path);
-    % TODO: load negative_cliques
-    % create_data_params.negative_cliques = load(esvm_train_params.cliques_data_path)
+    create_data_params.cliques_data = load(esvm_train_params.cliques_data_path);
 end
 
 esvm_train_params.create_data_params = create_data_params;

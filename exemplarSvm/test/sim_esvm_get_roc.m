@@ -1,71 +1,29 @@
-function [] = sim_esvm_get_roc(category_name, esvm_params)
-%GETROC Summary of this function goes here
-%   Detailed explanation goes here
+function [] = sim_esvm_get_roc(category_name, roc_params)
+%GETROC Plot ROC curve and calculate AUC.
+
 addpath(genpath('~/workspace/similarities'))
 addpath(genpath('~/workspace/exemplarsvm'))
 
-dataset_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports';
-PLOTS_DIR = 'plots';
-ESVM_DATA_FRACTION_STR = '0.1';
-ROUND_STR = '1';
-ESVM_MODELS_DIR_NAME = ['esvm/esvm_models_all_' ESVM_DATA_FRACTION_STR '_round' ROUND_STR];
-
-% TODO: check that esvm_params are filled and used in a proper way.
-
-if ~exist('esvm_params', 'var')
-    esvm_params.use_cnn_features = 0;% ESVM Uses CNN features or HOG.
-    esvm_params.features_path = ... % used only if use_cnn_features = 1
-        '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7.mat';
-    esvm_params.esvm_crops_dir_name = 'crops_227x227';
+if ~exist('roc_params', 'var')
+    roc_params = get_roc_params();
 end
 
-% Load features into memory
-if esvm_params.use_cnn_features && ~isfield(esvm_params, 'features_data')
-    tic;
-    fprintf('Reading CNN features file...\n');
-    assert(exist(esvm_params.features_path, 'file') ~= 0, ...
-                'File %s is not found', esvm_params.features_path);
-    esvm_params.features_data = load(esvm_params.features_path, 'features', 'features_flip');
-    toc
-end
+dataset_path = roc_params.dataset_path;
+load(roc_params.labels_filepath);
 
-if ~isfield(esvm_params, 'model_params')
-    esvm_params.model_params = sim_esvm_get_default_params;
-    if esvm_params.use_cnn_features
-        esvm_params.model_params.features_type = 'FeatureVector';
-        ESVM_MODELS_DIR_NAME = 'esvm/alexnet_esvm_models_long_jump';
-    else
-        esvm_params.model_params.features_type = 'HOG-like';
-    end
-end
-
-
-if ~exist('data_info', 'var')
-    data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
-end
-if ~isfield(data_info, 'dataset_path')
-    data_info.dataset_path = dataset_path;
-end
-
-% if ~exist('labels_filepath', 'var')
-labels_filepath = sprintf(['/net/hciserver03/storage/asanakoy/workspace/'...
-                          'dataset_labeling/merged_data_19.02.16/labels_%s.mat'], category_name);
-% end
-load(labels_filepath);
-
-%path_labels = ['./labels/labels_',category_name,'.mat'];
-path_simMatrix = ['~/workspace/OlympicSports/sim/simMatrix_', category_name, '.mat'];
-
-figure
+% ESVM_DATA_FRACTION_STR = '0.1';
+% ROUND_STR = '1';
+% model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR '-nocut']};
+model_name = {'HOG-LDA', roc_params.esvm_name};
 color = {'r','b'};
-model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR '-nocut']};
-% model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR]}
+figure
+
 NMODELS = 2;
 sims_esvm = {};
 
 for model_num = 1:NMODELS
     if model_num == 1
-        load(path_simMatrix)
+        load(roc_params.path_simMatrix) % TODO: maybe move this?
     end
     
     mean_x = [];
@@ -90,7 +48,7 @@ for model_num = 1:NMODELS
         else
             global_anchor_id = category_offset + labels(i).anchor;
             esvm_model_path = fullfile(data_info.dataset_path, ...
-                ESVM_MODELS_DIR_NAME, sprintf('%06d', global_anchor_id), ...
+                roc_params.esvm_models_dir, sprintf('%06d', global_anchor_id), ...
                                 sprintf('%06d-svm.mat', global_anchor_id));
 %                 sprintf('%06d-svm-removed_top_hrd.mat', global_anchor_id))
 
@@ -103,7 +61,7 @@ for model_num = 1:NMODELS
                 continue;
             end
             
-            sims = getEsvmScores(labels(i), category_offset, data_info, esvm_model_path, esvm_params);
+            sims = getEsvmScores(labels(i), category_offset, data_info, esvm_model_path, roc_params);
             sims_esvm{i} = sims;
             
         end
@@ -139,7 +97,7 @@ end
 legend(model_name);
 xlabel('False positive rate'); ylabel('True positive rate');
 title(strrep(category_name,'_', '-'));
-file_base = fullfile(dataset_path, PLOTS_DIR, sprintf('ROC_%s_%s_%s', ...
+file_base = fullfile(dataset_path, roc_params.plots_dir, sprintf('ROC_%s_%s_%s', ...
                      category_name, model_name{1}, model_name{2}));
 savefig([file_base '.fig']);
 
@@ -150,13 +108,13 @@ for i = 1:NMODELS
 end
 fclose(fileID);
 
-save(fullfile(dataset_path, PLOTS_DIR, sprintf('sims_%s_%s.mat', ...
+save(fullfile(dataset_path, roc_params.plots_dir, sprintf('sims_%s_%s.mat', ...
                      category_name, model_name{2})), 'sims_esvm');
 
 end
 
 
-function scores = getEsvmScores(label, category_offset, data_info, esvm_model_path, esvm_params)
+function scores = getEsvmScores(label, category_offset, data_info, esvm_model_path, roc_params)
 esvm_file = load(esvm_model_path);
 
 scores = zeros(1, length(label.positives.ids) + length(label.negatives.ids));
@@ -167,15 +125,15 @@ flipval = [label.positives.flipval label.negatives.flipval];
 for i = 1:length(ids)
     frame_id = category_offset + ids(i);
     
-    sample = createEsvmSample(frame_id, flipval(i), data_info, esvm_params);
+    sample = createEsvmSample(frame_id, flipval(i), data_info, roc_params);
    
-    scores(i) = sim_esvm_get_score(sample, esvm_file.models(1), esvm_params.model_params);
+    scores(i) = sim_esvm.get_score(sample, esvm_file.models(1), roc_params.detect_params);
     fprintf('ESVM::Detected img %d, score: %f\n', frame_id, scores(i));
 end
 
 end
 
-function sample = createEsvmSample(frame_id, flipval, data_info, esvm_params)
+function sample = createEsvmSample(frame_id, flipval, data_info, roc_params)
 % If use_cnn_features == 1 return ImageStruct.
 %   ImageStruct fields:
 %                       id - image id,
@@ -185,8 +143,8 @@ function sample = createEsvmSample(frame_id, flipval, data_info, esvm_params)
 %
 % If use_cnn_features == 0 return RGB image.
 
-    if esvm_params.use_cnn_features == 0
-        image_info = get_image_info(frame_id, data_info, esvm_params.esvm_crops_dir_name);
+    if roc_params.use_cnn_features == 0
+        image_info = get_image_info(frame_id, data_info, roc_params.esvm_crops_dir_name);
         im = imread(image_info.absolute_path);
         if flipval
             im = fliplr(im);
@@ -195,9 +153,9 @@ function sample = createEsvmSample(frame_id, flipval, data_info, esvm_params)
     else
         sample.id = frame_id;
         if ~flipval
-            sample.feature = esvm_params.features_data.features(frame_id, :)';
+            sample.feature = roc_params.features_data.features(frame_id, :)';
         else
-            sample.feature = esvm_params.features_data.features_flip(frame_id, :)';
+            sample.feature = roc_params.features_data.features_flip(frame_id, :)';
         end
     end
 end
