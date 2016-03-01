@@ -9,7 +9,7 @@ end
 IMAGE_SIZE = [227 227];
 CROPS_DIR_NAME = 'crops_227x227';
 FLIPPED_CROPS_DIR_NAME = 'crops_227x227-flipped';
-CROPS_PATHS = fullfile(params.crops_global_info.path, CROPS_DIR_NAME);
+CROPS_PATHS = fullfile(params.dataset_path, CROPS_DIR_NAME);
 
 objects = cell(1, length(frames_ids));
 

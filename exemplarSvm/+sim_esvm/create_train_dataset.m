@@ -13,9 +13,12 @@ end
 
 fprintf('Creating negative dataset...\n');
 if strcmp(params.create_negatives_policy, 'negative_cliques')
-    negative_ids = negatives_negative_cliques();
+    if length(anchor_ids) > 1
+        error('Negative_cliques creating policy cannot be used for batch of anchors. Only one acnhor is allowed.')
+    end
+    negative_ids = negatives_negative_cliques(anchor_ids(1), params);
 else
-    negative_ids = negatives_random_from_other_categories();
+    negative_ids = negatives_random_from_other_categories(params);
 end
 
 neg_objects = sim_esvm.create_dataset(negative_ids, params, false(size(negative_ids)));

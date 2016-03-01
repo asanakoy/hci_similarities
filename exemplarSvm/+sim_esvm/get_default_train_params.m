@@ -16,12 +16,15 @@ esvm_train_params = set_field_if_not_exist(esvm_train_params, 'dataset_path', '~
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'features_path', ... 
     '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7.mat'); % used only if use_cnn_features = 1
 
-%TODO: set cliques_data_path
-%esvm_train_params = set_field_if_not_exist(esvm_train_params, 'cliques_data_path', '~/workspace/OlympicSports/esvm');
-
-if ~exist('data_info', 'var')
-    data_info = load(DatasetStructure.getDataInfoPath(esvm_train_params.dataset_path));
+% policy for generating negative samples
+esvm_train_params = set_field_if_not_exist(esvm_train_params, 'create_negatives_policy', 'negative_cliques'); 
+if strcmp(esvm_train_params.create_negatives_policy, 'negative_cliques')
+    %TODO: set cliques_data_path
+    esvm_train_params = set_field_if_not_exist(esvm_train_params, 'cliques_data_path', '~/workspace/OlympicSports/clique-esvm/data/cliques_data.mat');
 end
+
+
+data_info = load(DatasetStructure.getDataInfoPath(esvm_train_params.dataset_path));
 
 % Use CNN features or HOG.
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'use_cnn_features', 1);
@@ -35,14 +38,13 @@ esvm_train_params = set_field_if_not_exist(esvm_train_params, 'should_run_test',
 % Load pathes instead of images. Load images in a lazy way.
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'use_image_pathes', 1);
 
-% policy for generating negative samples
-esvm_train_params = set_field_if_not_exist(esvm_train_params, 'create_negatives_policy', 'negative_cliques'); 
 
 
+create_data_params.dataset_path = esvm_train_params.dataset_path;
 create_data_params.use_cnn_features = esvm_train_params.use_cnn_features;
 create_data_params.data_info = data_info;
 %     create_data_params.category_offset = get_category_offset(category_name, data_info);
-create_data_params.neg_mining_data_fraction = esvm_train_params.train.neg_mining_data_fraction;
+create_data_params.neg_mining_data_fraction = esvm_train_params.neg_mining_data_fraction;
 % policy for generating negative samples
 create_data_params.create_negatives_policy = esvm_train_params.create_negatives_policy;  
 
@@ -57,19 +59,6 @@ else
 end
 create_data_params.crops_global_info = load(CROPS_ARRAY_FILEPATH);
 toc
-
-if ~exist('dataset', 'var')
-    tic;
-    fprintf('Reading dataset file...\n');
-    if esvm_train_params.use_image_pathes
-        CROPS_ARRAY_FILEPATH = fullfile(DatasetStructure.getDataDirPath(dataset_path), 'crops_global_info.mat');
-    else
-        CROPS_ARRAY_FILEPATH = fullfile(DatasetStructure.getDataDirPath(dataset_path), 'crops_227x227.mat');
-    end
-    dataset = load(CROPS_ARRAY_FILEPATH);
-    toc
-end
-
 
 if esvm_train_params.use_cnn_features == 1
     fprintf('Loading features...\n');
@@ -89,8 +78,9 @@ if strcmp(create_data_params.create_negatives_policy, 'negative_cliques')
 end
 
 esvm_train_params.create_data_params = create_data_params;
+esvm_train_params.is_inited = 1;
 
-check_esvm_train_params(esvm_train_params);
+sim_esvm.check_esvm_train_params(esvm_train_params);
 
 end
 

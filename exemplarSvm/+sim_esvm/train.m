@@ -1,6 +1,6 @@
 % Train Exemplar-SVMs
 % 
-% If ypu want to train useing CNN_FEATURES, you need to load features in
+% If you want to train useing CNN_FEATURES, you need to load features in
 % memory before running training.
 %
 % Copyright (C) 2015-16 by Artsiom Sanakoyeu
@@ -9,7 +9,7 @@ function [models, M] = train(anchor_id, anchor_flipval, output_dir, ...
                                      esvm_train_params, initial_models)
 
 narginchk(4, 5);
-check_esvm_train_params(esvm_train_params);
+sim_esvm.check_esvm_train_params(esvm_train_params);
 
 data_info = esvm_train_params.create_data_params.data_info;
 
@@ -45,7 +45,7 @@ params.dataset_params.localdir = output_dir;
 if esvm_train_params.use_cnn_features
     params.features_type = 'FeatureVector';
     params.init_params.features_type = params.features_type;
-    params.init_params.features = @sim_esvm_cnnfeatures; 
+    params.init_params.features = @sim_esvm.cnnfeatures; % NOTE: Not used now. Features are precomputed. 
     params.dataset_params.display = 0; % display is not implemented for FeatureVector
     params.dump_images = 0; % dump_images is not implemented for FeatureVector
 end
@@ -155,8 +155,8 @@ if esvm_train_params.should_run_test
     % right).
     maxk = 100;
 
-    allbbs = esvm_show_top_dets(test_struct, test_grid, test_set, models, ...
-                           params, maxk, test_set_name);
+    %allbbs = esvm_show_top_dets(test_struct, test_grid, test_set, models, ...
+    %                       params, maxk, test_set_name);
 end
 end
 
