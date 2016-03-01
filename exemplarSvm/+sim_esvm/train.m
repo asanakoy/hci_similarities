@@ -15,6 +15,7 @@ data_info = esvm_train_params.create_data_params.data_info;
 
 category_name = data_info.categoryNames{data_info.categoryLookupTable(anchor_id)};
 esvm_train_params.create_data_params.positive_category_name = category_name;
+esvm_train_params.create_data_params.positive_category_offset = get_category_offset(category_name, data_info);
 
 
 fprintf('->sim_esvm.train ...\n')

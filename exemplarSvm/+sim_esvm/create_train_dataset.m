@@ -2,6 +2,8 @@ function [ pos_objects, neg_objects ] = create_train_dataset( anchor_ids, anchor
 %Create train dataset (positives + pool of negatives of other categories)
 % Positive objects = achors, defined by anchor_ids
 assert(isfield(params, 'positive_category_name'));
+assert(isfield(params, 'positive_category_offset'));
+
 
 pos_objects = sim_esvm.create_dataset(anchor_ids, params, anchor_flipvals);
 for i = 1:length(pos_objects)
@@ -27,12 +29,25 @@ fprintf('Done.\n');
 end
 
 
-function [negative_ids] = negatives_negative_cliques(params)
-    % TODO:
+function [negative_ids] = negatives_negative_cliques(anchor_id, params)
+% Take all samples from negative (distant) cliques and use them as negatives.
+% Arguments:
+%           anchor_id - global id of the positive frame.
+%           params - create dataset params
+% NOTE: params.cliques_data contains local inter-categorial ids.
+
+    search_index = find(arrayfun(@(x) ...
+        x.anchor_id + params.positive_category_offset == anchor_id, ...
+        params.cliques_data.cliques, 'UniformOutput', true));
+    assety(length(search_index) == 1);
+    
+    negative_ids = cell2mat(params.cliques_data.cliques(search_index).neg);
+    negative_ids = negative_ids(:) + params.positive_category_offset; % convert from local to global ids.
 end
 
 
 function [negative_ids] = negatives_random_from_other_categories(params)
+% Random choose N * params.neg_mining_data_fraction samples from other categories as negatives.
     positive_category_id = find(ismember(params.data_info.categoryNames, params.positive_category_name));
     negative_ids = [];
     for i = 1:length(params.data_info.categoryNames)
@@ -44,7 +59,4 @@ function [negative_ids] = negatives_random_from_other_categories(params)
         cat_subset_idx = randperm(cat_length, ceil(cat_length * params.neg_mining_data_fraction));
         negative_ids = [negative_ids cat_ids(cat_subset_idx)];
     end
-    % negative_ids = find(data_info.categoryLookupTable ~= positive_category_id);
-    % negative_ids = negative_ids(randperm(length(negative_ids), 1000)); % GET subset
-    % negative_ids = negative_ids(1:25000);
 end

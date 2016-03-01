@@ -43,7 +43,6 @@ esvm_train_params = set_field_if_not_exist(esvm_train_params, 'use_image_pathes'
 create_data_params.dataset_path = esvm_train_params.dataset_path;
 create_data_params.use_cnn_features = esvm_train_params.use_cnn_features;
 create_data_params.data_info = data_info;
-%     create_data_params.category_offset = get_category_offset(category_name, data_info);
 create_data_params.neg_mining_data_fraction = esvm_train_params.neg_mining_data_fraction;
 % policy for generating negative samples
 create_data_params.create_negatives_policy = esvm_train_params.create_negatives_policy;  
