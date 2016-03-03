@@ -5,7 +5,7 @@ addpath(genpath('~/workspace/similarities'))
 addpath(genpath('~/workspace/exemplarsvm'))
 
 if ~exist('roc_params', 'var')
-    roc_params = get_roc_params();
+    roc_params = get_roc_params(category_name);
 end
 
 dataset_path = roc_params.dataset_path;
@@ -14,15 +14,17 @@ load(roc_params.labels_filepath);
 % ESVM_DATA_FRACTION_STR = '0.1';
 % ROUND_STR = '1';
 % model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR '-nocut']};
-model_name = {'HOG-LDA', roc_params.esvm_name};
+model_name = {roc_params.esvm_name, 'HOG-LDA'};
+ESVM_MODEL_INDEX = 1;
+HOG_LDA_MODEL_INDEX = 2;
 color = {'r','b'};
 figure
 
-NMODELS = 2;
+NMODELS = length(model_name);
 sims_esvm = {};
 
 for model_num = 1:NMODELS
-    if model_num == 1
+    if model_num == HOG_LDA_MODEL_INDEX && strcmp(model_name{model_num}, 'HOG-LDA')
         load(roc_params.path_simMatrix) % TODO: maybe move this?
     end
     
@@ -37,17 +39,17 @@ for model_num = 1:NMODELS
             continue
         end
         
-        if model_num == 1
+        if model_num == HOG_LDA_MODEL_INDEX && strcmp(model_name{model_num}, 'HOG-LDA')
             
             sims = simMatrix(labels(i).anchor,[labels(i).positives.ids,labels(i).negatives.ids]);
 %             figure();
 %             showImage(category_offset + labels(i).anchor, dataset_path, ...
-%                 data_info.sequenceFilesPathes, data_info.sequenceLookupTable, ...
+%                 roc_params.data_info.sequenceFilesPathes, roc_params.data_info.sequenceLookupTable, ...
 %                 sprintf('Anchor %d', i), 0);
             
         else
             global_anchor_id = category_offset + labels(i).anchor;
-            esvm_model_path = fullfile(data_info.dataset_path, ...
+            esvm_model_path = fullfile(roc_params.data_info.dataset_path, ...
                 roc_params.esvm_models_dir, sprintf('%06d', global_anchor_id), ...
                                 sprintf('%06d-svm.mat', global_anchor_id));
 %                 sprintf('%06d-svm-removed_top_hrd.mat', global_anchor_id))
@@ -61,7 +63,7 @@ for model_num = 1:NMODELS
                 continue;
             end
             
-            sims = getEsvmScores(labels(i), category_offset, data_info, esvm_model_path, roc_params);
+            sims = getEsvmScores(labels(i), category_offset, esvm_model_path, roc_params);
             sims_esvm{i} = sims;
             
         end
@@ -97,10 +99,17 @@ end
 legend(model_name);
 xlabel('False positive rate'); ylabel('True positive rate');
 title(strrep(category_name,'_', '-'));
-file_base = fullfile(dataset_path, roc_params.plots_dir, sprintf('ROC_%s_%s_%s', ...
-                     category_name, model_name{1}, model_name{2}));
-savefig([file_base '.fig']);
+fprintf('Number of anchor frames: %d\n', length(labels));
 
+
+models_str = '';
+for i = 1:NMODELS
+    models_str = strcat(models_str, '_', model_name{i});
+end
+
+file_base = fullfile(dataset_path, roc_params.plots_dir, sprintf('ROC_%s%s', ...
+                     category_name, models_str));
+                 
 fileID = fopen([file_base '.txt'], 'w');
 for i = 1:NMODELS
     fprintf(fileID,'%s-auc:\t %d\n', model_name{i}, auc(i));
@@ -108,13 +117,13 @@ for i = 1:NMODELS
 end
 fclose(fileID);
 
+save_figure(gcf, file_base);                
 save(fullfile(dataset_path, roc_params.plots_dir, sprintf('sims_%s_%s.mat', ...
-                     category_name, model_name{2})), 'sims_esvm');
-
+                     category_name, model_name{ESVM_MODEL_INDEX})), 'sims_esvm');
 end
 
 
-function scores = getEsvmScores(label, category_offset, data_info, esvm_model_path, roc_params)
+function scores = getEsvmScores(label, category_offset, esvm_model_path, roc_params)
 esvm_file = load(esvm_model_path);
 
 scores = zeros(1, length(label.positives.ids) + length(label.negatives.ids));
@@ -125,15 +134,26 @@ flipval = [label.positives.flipval label.negatives.flipval];
 for i = 1:length(ids)
     frame_id = category_offset + ids(i);
     
-    sample = createEsvmSample(frame_id, flipval(i), data_info, roc_params);
-   
+    sample = createEsvmSample(frame_id, flipval(i), roc_params);
     scores(i) = sim_esvm.get_score(sample, esvm_file.models(1), roc_params.detect_params);
+    
+%     scores(i) = get_correlation(frame_id, flipval(i), esvm_file.models{1}.frame_id, 0, roc_params);
+    
     fprintf('ESVM::Detected img %d, score: %f\n', frame_id, scores(i));
 end
 
 end
 
-function sample = createEsvmSample(frame_id, flipval, data_info, roc_params)
+function score = get_correlation(frame_id1, flipval1, frame_id2, flipval2, roc_params)
+% Calvulate pearson correlation between 2 feature vectors of specified frames.
+    assert(roc_params.use_cnn_features == 1);
+    a = createEsvmSample(frame_id1, flipval1, roc_params);
+    b = createEsvmSample(frame_id2, flipval2, roc_params);
+    
+    score = corr(a.feature, b.feature); 
+end
+
+function sample = createEsvmSample(frame_id, flipval, roc_params)
 % If use_cnn_features == 1 return ImageStruct.
 %   ImageStruct fields:
 %                       id - image id,
@@ -144,10 +164,17 @@ function sample = createEsvmSample(frame_id, flipval, data_info, roc_params)
 % If use_cnn_features == 0 return RGB image.
 
     if roc_params.use_cnn_features == 0
-        image_info = get_image_info(frame_id, data_info, roc_params.esvm_crops_dir_name);
-        im = imread(image_info.absolute_path);
+        if roc_params.should_use_crops_info == 1
+            image_path = fullfile(roc_params.dataset_path, ...
+                roc_params.esvm_crops_dir_name, ...
+                roc_params.crops_info.crops(frame_id).img_relative_path);
+        else
+            image_info = get_image_info(frame_id, roc_params.data_info, roc_params.esvm_crops_dir_name);
+            image_path = image_info.absolute_path;
+        end
+        im = imread(image_path);
         if flipval
-            im = fliplr(im);
+            im = utils.fliplr(im);
         end
         sample = im;
     else
@@ -157,5 +184,14 @@ function sample = createEsvmSample(frame_id, flipval, data_info, roc_params)
         else
             sample.feature = roc_params.features_data.features_flip(frame_id, :)';
         end
+    end
+end
+
+function save_figure(fig, file_base)
+    matlab_version = version('-release');
+    if str2num(matlab_version(1:4)) < 2013
+        saveas(fig, [file_base '.fig']); % for Matlab < 2013 
+    else
+        savefig(fig, [file_base '.fig']);
     end
 end

@@ -1,7 +1,7 @@
 function [score] = get_score( I, model, detect_params )
 % Apply ESVM to the image and get score
 
-if (~exist('params', 'var'))
+if (~exist('detect_params', 'var'))
     detect_params = sim_esvm.get_default_params;
 end
 %Maximum #windows per exemplar (per image) to keep

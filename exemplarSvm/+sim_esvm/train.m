@@ -116,8 +116,9 @@ train_params.train_max_images_per_iteration = 1000;
 % 1:N support vectors.
 [models] = esvm_train_exemplars_with_mining(initial_models, ...
                                 neg_set, train_params);
-                            
-models = remove_top_hardest_negatives(models, neg_set);
+
+% TODO: may be make as a parameter
+% models = remove_top_hardest_negatives(models, neg_set);
                             
 M = [];
 fprintf('Elapsed time fot ESVM training: %.2f seconds\n', toc(start_train));

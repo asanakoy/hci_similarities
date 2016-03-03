@@ -1,11 +1,11 @@
-function [ roc_params ] = get_roc_params()
+function [ roc_params ] = get_roc_params(category_name)
 %GET_ROC_PARAMS Get deafult params for ROC plotting.
 addpath(genpath('~/workspace/similarities'))
 
-roc_params.dataset_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports';
+roc_params.dataset_path = '~/workspace/OlympicSports';
 roc_params.plots_dir = 'plots';
 
-roc_params.use_cnn_features = 0;% ESVM Uses CNN features or HOG.
+roc_params.use_cnn_features = 1;% ESVM Uses CNN features or HOG.
 roc_params.features_path = ... % used only if use_cnn_features = 1
     '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7.mat';
 roc_params.esvm_crops_dir_name = 'crops_227x227';
@@ -21,10 +21,10 @@ if roc_params.use_cnn_features
     toc
 end
 
-roc_params.detect_params = sim_esvm_get_default_params;
+roc_params.detect_params = sim_esvm.get_default_params;
 if roc_params.use_cnn_features
     roc_params.detect_params.features_type = 'FeatureVector';
-    roc_params.esvm_models_dir = 'esvm/alexnet_esvm_models_long_jump';
+    roc_params.esvm_models_dir = 'esvm/alexnet_esvm_models_long_jump_all_data';
     roc_params.esvm_name = 'ESVM-alexnet-fc7';
 else
     roc_params.detect_params.features_type = 'HOG-like';
@@ -37,9 +37,14 @@ end
 
 
 roc_params.data_info = load(DatasetStructure.getDataInfoPath(roc_params.dataset_path));
-    
 if ~isfield(roc_params.data_info, 'dataset_path')
     roc_params.data_info.dataset_path = roc_params.dataset_path;
+end
+
+roc_params.should_use_crops_info = 1; % Use crops_info file to get fetch image patches.
+if roc_params.should_use_crops_info == 1
+    CROPS_INFO_FILEPATH = fullfile(DatasetStructure.getDataDirPath(roc_params.dataset_path), 'crops_global_info.mat');
+    roc_params.crops_info = load(CROPS_INFO_FILEPATH);
 end
 
 roc_params.labels_filepath = sprintf(['~/workspace/dataset_labeling'...
@@ -48,4 +53,3 @@ roc_params.labels_filepath = sprintf(['~/workspace/dataset_labeling'...
 roc_params.path_simMatrix = ['~/workspace/OlympicSports/sim/simMatrix_', category_name, '.mat'];
 
 end
-
