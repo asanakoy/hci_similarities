@@ -49,12 +49,14 @@ for model_num = 1:NMODELS
             
         else
             global_anchor_id = category_offset + labels(i).anchor;
+            if roc_params.use_models_with_top_hardest_negatives_removed == 0
+                model_name_format_str = '%06d-svm.mat';
+            else
+                model_name_format_str = '%06d-svm-removed_top_hrd.mat';
+            end
             esvm_model_path = fullfile(roc_params.data_info.dataset_path, ...
                 roc_params.esvm_models_dir, sprintf('%06d', global_anchor_id), ...
-                                sprintf('%06d-svm.mat', global_anchor_id));
-%                 sprintf('%06d-svm-removed_top_hrd.mat', global_anchor_id))
-
-
+                                sprintf(model_name_format_str, global_anchor_id));
 
             
             if ~exist(esvm_model_path, 'file')

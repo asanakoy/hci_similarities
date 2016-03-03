@@ -30,7 +30,7 @@ data_info = load(DatasetStructure.getDataInfoPath(esvm_train_params.dataset_path
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'use_cnn_features', 1);
 
 % Portion of data to use for negative mining.
-esvm_train_params = set_field_if_not_exist(esvm_train_params, 'neg_mining_data_fraction', 0.1);
+esvm_train_params = set_field_if_not_exist(esvm_train_params, 'negatives_train_data_fraction', 0.1);
 
 % Run test for esvm (together with visualization)?
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'should_run_test', 0);
@@ -38,12 +38,16 @@ esvm_train_params = set_field_if_not_exist(esvm_train_params, 'should_run_test',
 % Load pathes instead of images. Load images in a lazy way.
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'use_image_pathes', 1);
 
+% Train using negative maining or at once(just on all dataset at once)?
+esvm_train_params = set_field_if_not_exist(esvm_train_params, 'use_negative_mining', 1);
 
+% How many top hard negatives to remove.
+esvm_train_params = set_field_if_not_exist(esvm_train_params, 'remove_top_hard_negatives_fraction', 0.0);
 
 create_data_params.dataset_path = esvm_train_params.dataset_path;
 create_data_params.use_cnn_features = esvm_train_params.use_cnn_features;
 create_data_params.data_info = data_info;
-create_data_params.neg_mining_data_fraction = esvm_train_params.neg_mining_data_fraction;
+create_data_params.negatives_train_data_fraction = esvm_train_params.negatives_train_data_fraction;
 % policy for generating negative samples
 create_data_params.create_negatives_policy = esvm_train_params.create_negatives_policy;  
 
@@ -60,7 +64,7 @@ create_data_params.crops_global_info = load(CROPS_ARRAY_FILEPATH);
 toc
 
 if esvm_train_params.use_cnn_features == 1
-    fprintf('Loading features...\n');
+    fprintf('Loading features... from %s\n', esvm_train_params.features_path);
     assert(exist(esvm_train_params.features_path, 'file') ~= 0, ...
             'File %s is not found', esvm_train_params.features_path);
     create_data_params.features_data = load(esvm_train_params.features_path, 'features', 'features_flip');

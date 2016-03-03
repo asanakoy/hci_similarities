@@ -114,13 +114,17 @@ train_params.train_max_images_per_iteration = 1000;
 % part, w's negative part, and four mean support vector images,
 % where the means are computed with the first 1:N/4, 1:N/2, .. ,
 % 1:N support vectors.
-[models] = esvm_train_exemplars_with_mining(initial_models, ...
-                                neg_set, train_params);
+if esvm_train_params.use_negative_mining == 0
+    [models] = esvm_train_exemplars(initial_models, neg_set, train_params);
+else
+    [models] = esvm_train_exemplars_with_mining(initial_models, ...
+                                    neg_set, train_params);
+end
 
-% TODO: may be make as a parameter
-% models = remove_top_hardest_negatives(models, neg_set);
+if esvm_train_params.remove_top_hard_negatives_fraction > 0.0
+    models = remove_top_hardest_negatives(models, neg_set, esvm_train_params);
+end
                             
-M = [];
 fprintf('Elapsed time fot ESVM training: %.2f seconds\n', toc(start_train));
 
 if esvm_train_params.should_run_test
@@ -128,7 +132,7 @@ if esvm_train_params.should_run_test
     
     fprintf('Press Enter to start testing');
 %     pause;
-
+    
     %% Define test-set
     % test_images_ids = [3605 3910 10000 38000 31000 3610];
     positive_category_id = find(ismember(data_info.categoryNames, category_name));
@@ -147,6 +151,7 @@ if esvm_train_params.should_run_test
     test_grid = esvm_detect_imageset(test_set, models, test_params, test_set_name);
 
     %% Apply calibration matrix to test-set results
+    M = [];
     test_struct = esvm_pool_exemplar_dets(test_grid, models, M, test_params);
     fprintf('Elapsed time fot ESVM testing: %.2f seconds\n', toc(start_test));
 
@@ -162,9 +167,9 @@ if esvm_train_params.should_run_test
 end
 end
 
-function [models] = remove_top_hardest_negatives(models, neg_set)
+function [models] = remove_top_hardest_negatives(models, neg_set, esvm_train_params)
    %% Remove the hardest negatives
-    PART_OF_NEGATIVES_TO_REMOVE = 0.1;
+    PART_OF_NEGATIVES_TO_REMOVE = esvm_train_params.remove_top_hard_negatives_fraction;
     fprintf('Dropping %f%% of the top hardest negatives...\n', PART_OF_NEGATIVES_TO_REMOVE * 100);
     for i = 1:length(models)
         scores = models{i}.model.w(:)' * models{i}.model.svxs - models{i}.model.b;
@@ -172,15 +177,21 @@ function [models] = remove_top_hardest_negatives(models, neg_set)
         new_start = ceil(PART_OF_NEGATIVES_TO_REMOVE * length(idx));
         idx = idx(new_start:end);
         models{i}.model.svxs = models{i}.model.svxs(:,idx);
-        models{i}.model.svbbs = models{i}.model.svbbs(idx,:);
+        
+        if esvm_train_params.use_negative_mining == 0
+            models{i} = esvm_train_svm_at_once(models{i}, models{i}.model.svxs);
+        else
+            models{i}.model.svbbs = models{i}.model.svbbs(idx,:);
 
-        [models{i}, ~] = esvm_update_svm(models{i});
-        cur_iter = models{i}.iteration + 1;
-        models{i}.iteration = cur_iter;  
-        models{i}.mining_stats{cur_iter}.num_epty = 0;
-        models{i}.mining_stats{cur_iter}.num_violating = 0;
-        models{i}.mining_stats{cur_iter}.total_mines = 0;
-        models{i}.mining_stats{cur_iter}.comment = sprintf('cutted_%.2f_top_hard_neg', PART_OF_NEGATIVES_TO_REMOVE);
+            models{i} = esvm_update_svm(models{i});
+            cur_iter = models{i}.iteration + 1;
+            models{i}.iteration = cur_iter;  
+            models{i}.mining_stats{cur_iter}.num_epty = 0;
+            models{i}.mining_stats{cur_iter}.num_violating = 0;
+            models{i}.mining_stats{cur_iter}.total_mines = 0;
+            models{i}.mining_stats{cur_iter}.comment = sprintf('cutted_%.2f_top_hard_neg', PART_OF_NEGATIVES_TO_REMOVE);
+        end
+        
         if models{1}.mining_params.dump_images == 1
             esvm_dump_figures(models{i}, neg_set);
         end
