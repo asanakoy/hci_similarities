@@ -1,4 +1,4 @@
-function [] = sim_esvm_get_roc(category_name, roc_params)
+function [esvm_auc] = sim_esvm_get_roc(category_name, roc_params)
 %GETROC Plot ROC curve and calculate AUC.
 
 addpath(genpath('~/workspace/similarities'))
@@ -14,7 +14,7 @@ load(roc_params.labels_filepath);
 % ESVM_DATA_FRACTION_STR = '0.1';
 % ROUND_STR = '1';
 % model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR '-nocut']};
-model_name = {roc_params.esvm_name, 'HOG-LDA'};
+model_name = {roc_params.esvm_name};
 ESVM_MODEL_INDEX = 1;
 HOG_LDA_MODEL_INDEX = 2;
 color = {'r','b'};
@@ -54,7 +54,7 @@ for model_num = 1:NMODELS
             else
                 model_name_format_str = '%06d-svm-removed_top_hrd.mat';
             end
-            esvm_model_path = fullfile(roc_params.data_info.dataset_path, ...
+            esvm_model_path = fullfile(...
                 roc_params.esvm_models_dir, sprintf('%06d', global_anchor_id), ...
                                 sprintf(model_name_format_str, global_anchor_id));
 
@@ -103,6 +103,7 @@ xlabel('False positive rate'); ylabel('True positive rate');
 title(strrep(category_name,'_', '-'));
 fprintf('Number of anchor frames: %d\n', length(labels));
 
+roc_params
 
 models_str = '';
 for i = 1:NMODELS
@@ -114,14 +115,16 @@ file_base = fullfile(dataset_path, roc_params.plots_dir, sprintf('ROC_%s%s', ...
                  
 fileID = fopen([file_base '.txt'], 'w');
 for i = 1:NMODELS
-    fprintf(fileID,'%s-auc:\t %d\n', model_name{i}, auc(i));
-    fprintf('%s-auc:\t %d\n', model_name{i}, auc(i));
+    fprintf(fileID,'%s-auc:\t %.4f\n', model_name{i}, auc(i));
+    fprintf('%s-auc:\t %.4f\n', model_name{i}, auc(i));
 end
 fclose(fileID);
 
 save_figure(gcf, file_base);                
 save(fullfile(dataset_path, roc_params.plots_dir, sprintf('sims_%s_%s.mat', ...
                      category_name, model_name{ESVM_MODEL_INDEX})), 'sims_esvm');
+                 
+esvm_auc = auc(ESVM_MODEL_INDEX);
 end
 
 

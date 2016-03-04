@@ -25,3 +25,6 @@ else
     sim_esvm_run;
 end
 
+fprintf('Cleaning model folders...\n');
+ret_code = system(sprintf('sh ~/workspace/OlympicSports/esvm/clean_esvm_folders.sh %s', ESVM_MODELS_DIR));
+assert(ret_code == 0);

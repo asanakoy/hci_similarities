@@ -44,6 +44,9 @@ esvm_train_params = set_field_if_not_exist(esvm_train_params, 'use_negative_mini
 % How many top hard negatives to remove.
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'remove_top_hard_negatives_fraction', 0.0);
 
+% SVM training type
+esvm_train_params = set_field_if_not_exist(esvm_train_params, 'training_type', 'esvm'); % ['esvm', 'clique_svm', 'esvm_positive_clique_embedding']
+
 create_data_params.dataset_path = esvm_train_params.dataset_path;
 create_data_params.use_cnn_features = esvm_train_params.use_cnn_features;
 create_data_params.data_info = data_info;

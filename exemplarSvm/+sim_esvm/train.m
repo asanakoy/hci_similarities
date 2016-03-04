@@ -9,7 +9,10 @@ function [models, M] = train(anchor_id, anchor_flipval, output_dir, ...
                                      esvm_train_params, initial_models)
 
 narginchk(4, 5);
+assert(length(anchor_id) == 1 && length(anchor_flipval) == 1);
 sim_esvm.check_esvm_train_params(esvm_train_params);
+assert(isfield(esvm_train_params, 'train_svm_c'));
+assert(isfield(esvm_train_params, 'positive_class_weight_multiplier'));
 
 data_info = esvm_train_params.create_data_params.data_info;
 
@@ -25,16 +28,14 @@ fprintf('->sim_esvm.train ...\n')
 % without any circular pattern.
 % Npos = 100; Nneg = 50; [pos_set,neg_set] = esvm_generate_dataset(Npos,Nneg);
 start_train = tic;
-anchor_ids = [anchor_id];
-anchor_flipvals = [anchor_flipval];
-assert(all(anchor_flipvals == 0), 'Anchor flipval is not zero!');
+assert(all(anchor_flipval == 0), 'Anchor flipval is not zero!');
 
-model_name = sprintf('%06d', anchor_ids(1)); % category name
+model_name = sprintf('%06d', anchor_id); % category name
 if anchor_flipval
     model_name = [model_name '_flipped'];
 end
 
-[pos_set, neg_set] = sim_esvm.create_train_dataset(anchor_ids, anchor_flipvals, esvm_train_params.create_data_params);
+[pos_set, neg_set] = sim_esvm.create_train_dataset(anchor_id, anchor_flipval, esvm_train_params.create_data_params);
 
 
 
@@ -42,6 +43,9 @@ end
 params = sim_esvm.get_default_params;
 %if localdir is not set, we do not dump files
 params.dataset_params.localdir = output_dir;
+
+params.train_svm_c = esvm_train_params.train_svm_c;
+params.train_positives_constant = esvm_train_params.positive_class_weight_multiplier;
 
 if esvm_train_params.use_cnn_features
     params.features_type = 'FeatureVector';
@@ -58,7 +62,14 @@ stream_params.must_have_seg = 0;
 stream_params.must_have_seg_string = '';
 stream_params.model_type = 'exemplar'; %must be scene or exemplar
 %assign pos_set as variable, because we need it for visualization
-stream_params.pos_set = pos_set;
+if strcmp(esvm_train_params.training_type, 'clique_esvm')
+    stream_params.pos_set = create_dataset(anchor_id, esvm_train_params.create_data_params, 0) ;
+elseif strcmp(esvm_train_params.training_type, 'esvm')
+    stream_params.pos_set = pos_set;
+    assert(length(pos_set) == 1);
+else
+    assert(false, 'Unsopported training_type: %s', esvm_train_params.training_type);
+end
 stream_params.cls = category_name;
 
 %% Get the positive stream
@@ -83,7 +94,30 @@ else
     fprintf('Using pre-trained model');
 end
 
+if strcmp(esvm_train_params.training_type, 'clique_esvm')
+    assert(lenght(initial_models) == 1);
+    initial_models{1}.pos_train_set = pos_set;
+    initial_models{1}.neg_train_set = neg_set;
+elseif strcmp(esvm_train_params.training_type, 'esvm')
+    assert(length(initial_models) == 1);
+    assert(length(pos_set) == 1);
+    initial_models{1}.pos_train_set = pos_set;
+    assert(initial_models{1}.frame_id == pos_set{1}.I.id);
+    initial_models{1}.neg_train_set = neg_set;
 
+elseif strcmp(esvm_train_params.training_type, 'esvm_positive_clique_embedding')
+    assert(false, 'Not implemented');
+    % TODO: check
+    for i = lenght(initial_models)
+        initial_models{i}.pos_train_set = pos_set{i};
+        assert(initial_models{i}.frame_id == pos_set{i}.I.id);
+        initial_models{i}.neg_train_set = neg_set;
+    end
+else
+    assert(false, 'Unknown training_type: %s', esvm_train_params.training_type);
+end
+    
+    
 %% Set exemplar-svm training parameters
 train_params = params;
 
@@ -115,13 +149,19 @@ train_params.train_max_images_per_iteration = 1000;
 % where the means are computed with the first 1:N/4, 1:N/2, .. ,
 % 1:N support vectors.
 if esvm_train_params.use_negative_mining == 0
-    [models] = esvm_train_exemplars(initial_models, neg_set, train_params);
+    
+    [models] = esvm_train_exemplars(initial_models, train_params);
+    
 else
+    assert(strcmp(esvm_train_params.training_type, 'esvm'), ...
+        'Negatives mining is unsupported for training_type: %s', esvm_train_params.training_type);
+    
     [models] = esvm_train_exemplars_with_mining(initial_models, ...
                                     neg_set, train_params);
 end
 
 if esvm_train_params.remove_top_hard_negatives_fraction > 0.0
+    assert(esvm_train_params.use_negative_mining == 1);
     models = remove_top_hardest_negatives(models, neg_set, esvm_train_params);
 end
                             

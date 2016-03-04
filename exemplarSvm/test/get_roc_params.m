@@ -1,4 +1,4 @@
-function [ roc_params ] = get_roc_params(category_name)
+function [ roc_params ] = get_roc_params(category_name, models_path)
 %GET_ROC_PARAMS Get deafult params for ROC plotting.
 addpath(genpath('~/workspace/similarities'))
 
@@ -25,14 +25,24 @@ end
 roc_params.detect_params = sim_esvm.get_default_params;
 if roc_params.use_cnn_features
     roc_params.detect_params.features_type = 'FeatureVector';
-    roc_params.esvm_models_dir = 'esvm/alexnet_zscores_esvm_at_once_models_long_jump_negative_cliques';
+    if exist('models_path', 'var')
+        roc_params.esvm_models_dir = models_path;
+    else
+        roc_params.esvm_models_dir = fullfile(roc_params.dataset_path, ...
+            'esvm/alexnet_zscores_esvm_mining_models_long_jump_random_from_other_categories_c0.01');
+    end
     roc_params.esvm_name = 'ESVM-alexnet-fc7-zscores';
 else
     roc_params.detect_params.features_type = 'HOG-like';
-    ESVM_DATA_FRACTION_STR = '0.1';
-    ROUND_STR = '1';
-    roc_params.esvm_models_dir = ['esvm/esvm_models_all_' ESVM_DATA_FRACTION_STR '_round' ROUND_STR];
-%     roc_params.esvm_models_dir = 'esvm/esvm_long_jump_test';
+    if exist('models_path', 'var')
+        roc_params.esvm_models_dir = models_path;
+    else
+        ESVM_DATA_FRACTION_STR = '0.1';
+        ROUND_STR = '1';
+        roc_params.esvm_models_dir = ['esvm/esvm_models_all_' ESVM_DATA_FRACTION_STR '_round' ROUND_STR];
+    %     roc_params.esvm_models_dir = 'esvm/esvm_long_jump_test';
+        roc_params.esvm_models_dir = fullfile(roc_params.dataset_path, roc_params.esvm_models_dir);
+    end
     roc_params.esvm_name = 'ESVM-HOG';
 end
 
