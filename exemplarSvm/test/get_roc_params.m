@@ -7,10 +7,10 @@ roc_params.plots_dir = 'plots';
 
 roc_params.use_cnn_features = 1;% ESVM Uses CNN features or HOG.
 roc_params.features_path = ... % used only if use_cnn_features = 1
-    '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7_zscores.mat';
+    '~/workspace/OlympicSports/data/features_hog_pedro_227x227.mat';
 roc_params.esvm_crops_dir_name = 'crops_227x227';
 
-roc_params.use_models_with_top_hardest_negatives_removed = 1;
+roc_params.use_models_with_top_hardest_negatives_removed = 0;
 
 % Load features into memory
 if roc_params.use_cnn_features
@@ -29,9 +29,9 @@ if roc_params.use_cnn_features
         roc_params.esvm_models_dir = models_path;
     else
         roc_params.esvm_models_dir = fullfile(roc_params.dataset_path, ...
-            'esvm/alexnet_zscores_esvm_mining_models_long_jump_random_from_other_categories_c0.01');
+            'esvm/hog_pedro_initialization_esvm_model');
     end
-    roc_params.esvm_name = 'ESVM-alexnet-fc7-zscores';
+    roc_params.esvm_name = 'ESVM-HOG-pedro-init';
 else
     roc_params.detect_params.features_type = 'HOG-like';
     if exist('models_path', 'var')
@@ -61,6 +61,7 @@ end
 roc_params.labels_filepath = sprintf(['~/workspace/dataset_labeling'...
                                        '/merged_data_19.02.16/labels_%s.mat'], category_name);
 
-roc_params.path_simMatrix = ['~/workspace/OlympicSports/sim/simMatrix_', category_name, '.mat'];
+% roc_params.path_simMatrix = ['~/workspace/OlympicSports/sim/simMatrix_', category_name, '.mat'];
+roc_params.path_simMatrix = ['~/workspace/OlympicSports/sim_pedro_hog/sim_max_hog_pedro_', category_name, '.mat'];
 
 end

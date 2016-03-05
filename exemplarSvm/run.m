@@ -1,3 +1,7 @@
+log_path = '~/tmp/esvm_log.txt';
+system(sprintf('rm %s.old && mv %s %s.old', log_path));
+diary(log_path);
+
 sim_esvm_init;
 
 
@@ -26,5 +30,7 @@ else
 end
 
 fprintf('Cleaning model folders...\n');
+diary off
+
 ret_code = system(sprintf('sh ~/workspace/OlympicSports/esvm/clean_esvm_folders.sh %s', ESVM_MODELS_DIR));
 assert(ret_code == 0);

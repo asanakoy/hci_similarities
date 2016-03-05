@@ -4,8 +4,8 @@ function [] = merge_features_from_all_categories()
 
 addpath(genpath('~/workspace/similarities'));
 dataset_path = '~/workspace/OlympicSports';
-features_input_path = '/net/hciserver03/storage/mbautist/Desktop/projects/cnn_similarities/compute_similarities/sims';
-output_filepath = '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7.mat';
+features_input_path = '/net/hciserver03/storage/mbautist/Desktop/projects/cnn_similarities/compute_similarities/sims/';
+output_filepath = '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7_pre_RELU.mat';
 
 data_info = load(DatasetStructure.getDataInfoPath(dataset_path), 'categoryNames');
 
@@ -13,7 +13,8 @@ features = [];
 features_flip = [];
 for i = 1:length(data_info.categoryNames)
     fprintf('Reading and concatenating features for %s...\n', data_info.categoryNames{i});
-    filename = sprintf('features_%s_imagenet-alexnet_iter_0_fc7.mat', data_info.categoryNames{i});
+    
+    filename = sprintf('features_BEFORE_RELU_%s_imagenet-alexnet_iter_0_fc7.mat', data_info.categoryNames{i});
     file = load(fullfile(features_input_path, filename));
     
     features      = [features; file.features];

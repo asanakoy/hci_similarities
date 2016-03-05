@@ -1,11 +1,11 @@
-function [ pos_objects, neg_objects ] = create_train_dataset( anchor_ids, anchor_flipvals, params)
+function [ pos_objects, neg_objects ] = create_train_dataset( positive_ids, positive_flipvals, params)
 %Create train dataset (positives + pool of negatives of other categories)
 % Positive objects = achors, defined by anchor_ids
 assert(isfield(params, 'positive_category_name'));
 assert(isfield(params, 'positive_category_offset'));
 
 
-pos_objects = sim_esvm.create_dataset(anchor_ids, params, anchor_flipvals);
+pos_objects = sim_esvm.create_dataset(positive_ids, params, positive_flipvals);
 for i = 1:length(pos_objects)
     if ~strcmp(params.positive_category_name, pos_objects{i}.recs.cname)
         error('Error.\nAll anchors must be from the same category - "%s".\nBut we found - %s!', ...
@@ -14,16 +14,16 @@ for i = 1:length(pos_objects)
 end
 
 fprintf('Creating negative dataset [Policy: %s]...\n', params.create_negatives_policy);
-if length(anchor_ids) > 1 && ...
+if length(positive_ids) > 1 && ...
         (strcmp(params.create_negatives_policy, 'negative_cliques') || ...
          strcmp(params.create_negatives_policy, 'random_from_same_category'))
     error('Negative_cliques creating policy cannot be used for batch of anchors. Only one acnhor is allowed.')
 end
     
 if strcmp(params.create_negatives_policy, 'negative_cliques')
-    negative_ids = negatives_negative_cliques(anchor_ids(1), params);
+    negative_ids = negatives_negative_cliques(positive_ids(1), params);
 elseif strcmp(params.create_negatives_policy, 'random_from_same_category')
-    negative_ids = negatives_random_from_same_category(anchor_ids(1), params);
+    negative_ids = negatives_random_from_same_category(positive_ids(1), params);
 else
     negative_ids = negatives_random_from_other_categories(params);
 end
@@ -52,7 +52,7 @@ function [negative_ids] = negatives_negative_cliques(anchor_id, params)
     % Sanity check, that we don't count anchor frame as negative!
     assert(~ismember(anchor_id, negative_ids), ...
         'The anchor frame belongs to negative clique! Local anchor_id: %d', ...
-        anchor_id - params.positive_category_offset);
+        anchor_id - params.positive_category_offset); %TODO: later we woukd like to check that we don't have positives in neg click!
     negative_ids = setdiff(negative_ids, anchor_id);
     
     assert(~isempty(negative_ids));

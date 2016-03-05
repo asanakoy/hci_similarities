@@ -29,7 +29,7 @@ assert(params.use_cnn_features == 0 || isfield(params, 'features_path'));
 assert(params.remove_top_hard_negatives_fraction <= 1.0);
 assert(params.negatives_train_data_fraction <= 1.0);
 assert(any(cellfun(@(x) strcmp(x, params.training_type), ...
-    {'esvm', 'clique_svm', 'esvm_positive_clique_embedding'})));
+    {'esvm', 'clique_svm', 'pos_svm', 'esvm_positive_clique_embedding'})));
 
 assert(isstruct(params.create_data_params));
 for fieldname = create_data_params_required_fields

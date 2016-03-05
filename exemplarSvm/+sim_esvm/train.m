@@ -12,7 +12,8 @@ narginchk(4, 5);
 assert(length(anchor_id) == 1 && length(anchor_flipval) == 1);
 sim_esvm.check_esvm_train_params(esvm_train_params);
 assert(isfield(esvm_train_params, 'train_svm_c'));
-assert(isfield(esvm_train_params, 'positive_class_weight_multiplier'));
+assert(isfield(esvm_train_params, 'positive_class_svm_weight'));
+assert(isfield(esvm_train_params, 'auto_weight_svm_classes'));
 
 data_info = esvm_train_params.create_data_params.data_info;
 
@@ -35,7 +36,19 @@ if anchor_flipval
     model_name = [model_name '_flipped'];
 end
 
-[pos_set, neg_set] = sim_esvm.create_train_dataset(anchor_id, anchor_flipval, esvm_train_params.create_data_params);
+
+if strcmp(esvm_train_params.training_type, 'pos_svm')
+    labels = esvm_train_params.labeled_data.labels;
+    [positives, ~] = sim_esvm.get_test_data(anchor_id, labels, data_info);
+    
+    positive_ids = [anchor_id, positives.ids];
+    positive_flipvals = [anchor_flipval, positives.flipval];
+else
+    positive_ids = anchor_id;
+    positive_flipvals = anchor_flipval;
+end
+
+[pos_set, neg_set] = sim_esvm.create_train_dataset(positive_ids, positive_flipvals, esvm_train_params.create_data_params);
 
 
 
@@ -45,7 +58,12 @@ params = sim_esvm.get_default_params;
 params.dataset_params.localdir = output_dir;
 
 params.train_svm_c = esvm_train_params.train_svm_c;
-params.train_positives_constant = esvm_train_params.positive_class_weight_multiplier;
+params.positive_class_svm_weight = esvm_train_params.positive_class_svm_weight;
+%Should we use: W_pos = n_pos / N, W_neg = n_neg / N ?
+params.auto_weight_svm_classes = esvm_train_params.auto_weight_svm_classes;
+
+assert(params.auto_weight_svm_classes == 0 || esvm_train_params.use_negative_mining == 1, ...
+    'auto_weight_svm_classes not implemented for training at once!'); % TODO: implement for 'at once'.
 
 if esvm_train_params.use_cnn_features
     params.features_type = 'FeatureVector';
@@ -62,8 +80,8 @@ stream_params.must_have_seg = 0;
 stream_params.must_have_seg_string = '';
 stream_params.model_type = 'exemplar'; %must be scene or exemplar
 %assign pos_set as variable, because we need it for visualization
-if strcmp(esvm_train_params.training_type, 'clique_esvm')
-    stream_params.pos_set = create_dataset(anchor_id, esvm_train_params.create_data_params, 0) ;
+if strcmp(esvm_train_params.training_type, 'clique_svm') || strcmp(esvm_train_params.training_type, 'pos_svm')
+    stream_params.pos_set = sim_esvm.create_dataset(anchor_id, esvm_train_params.create_data_params, 0) ;
 elseif strcmp(esvm_train_params.training_type, 'esvm')
     stream_params.pos_set = pos_set;
     assert(length(pos_set) == 1);
@@ -94,8 +112,8 @@ else
     fprintf('Using pre-trained model');
 end
 
-if strcmp(esvm_train_params.training_type, 'clique_esvm')
-    assert(lenght(initial_models) == 1);
+if strcmp(esvm_train_params.training_type, 'clique_svm') || strcmp(esvm_train_params.training_type, 'pos_svm')
+    assert(length(initial_models) == 1);
     initial_models{1}.pos_train_set = pos_set;
     initial_models{1}.neg_train_set = neg_set;
 elseif strcmp(esvm_train_params.training_type, 'esvm')
@@ -153,7 +171,7 @@ if esvm_train_params.use_negative_mining == 0
     [models] = esvm_train_exemplars(initial_models, train_params);
     
 else
-    assert(strcmp(esvm_train_params.training_type, 'esvm'), ...
+    assert(strcmp(esvm_train_params.training_type, 'esvm') || strcmp(esvm_train_params.training_type, 'pos_svm'), ...
         'Negatives mining is unsupported for training_type: %s', esvm_train_params.training_type);
     
     [models] = esvm_train_exemplars_with_mining(initial_models, ...

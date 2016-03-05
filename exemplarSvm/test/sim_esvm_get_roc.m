@@ -1,8 +1,11 @@
-function [esvm_auc] = sim_esvm_get_roc(category_name, roc_params)
+function [esvm_auc, corr_auc] = sim_esvm_get_roc(category_name, roc_params)
 %GETROC Plot ROC curve and calculate AUC.
 
 addpath(genpath('~/workspace/similarities'))
 addpath(genpath('~/workspace/exemplarsvm'))
+esvm_auc = -1;
+corr_auc = -1;
+
 
 if ~exist('roc_params', 'var')
     roc_params = get_roc_params(category_name);
@@ -13,10 +16,12 @@ load(roc_params.labels_filepath);
 
 % ESVM_DATA_FRACTION_STR = '0.1';
 % ROUND_STR = '1';
-% model_name = {'HOG-LDA', ['ESVM-' ESVM_DATA_FRACTION_STR '-R' ROUND_STR '-nocut']};
-model_name = {roc_params.esvm_name};
-ESVM_MODEL_INDEX = 1;
-HOG_LDA_MODEL_INDEX = 2;
+% model_name = {'HOG-LDA', roc_params.esvm_name};
+model_name = {roc_params.esvm_name, 'corr'};
+ESVM_MODEL_INDEX = find(cellfun(@(x) strcmp(x, roc_params.esvm_name), model_name));
+SIM_MATRIX_MODEL_INDEX = find(cellfun(@(x) strncmpi(x, 'SIM', 3), model_name));
+CORR_INDEX  = find(cellfun(@(x) strcmp(x, 'corr'), model_name));
+
 color = {'r','b'};
 figure
 
@@ -24,8 +29,8 @@ NMODELS = length(model_name);
 sims_esvm = {};
 
 for model_num = 1:NMODELS
-    if model_num == HOG_LDA_MODEL_INDEX && strcmp(model_name{model_num}, 'HOG-LDA')
-        load(roc_params.path_simMatrix) % TODO: maybe move this?
+    if model_num == SIM_MATRIX_MODEL_INDEX
+        load(roc_params.path_simMatrix)
     end
     
     mean_x = [];
@@ -39,15 +44,15 @@ for model_num = 1:NMODELS
             continue
         end
         
-        if model_num == HOG_LDA_MODEL_INDEX && strcmp(model_name{model_num}, 'HOG-LDA')
+        if model_num == SIM_MATRIX_MODEL_INDEX
             
-            sims = simMatrix(labels(i).anchor,[labels(i).positives.ids,labels(i).negatives.ids]);
+            sims = simMatrix(labels(i).anchor, [labels(i).positives.ids,labels(i).negatives.ids]);
 %             figure();
 %             showImage(category_offset + labels(i).anchor, dataset_path, ...
 %                 roc_params.data_info.sequenceFilesPathes, roc_params.data_info.sequenceLookupTable, ...
 %                 sprintf('Anchor %d', i), 0);
             
-        else
+        elseif model_num == ESVM_MODEL_INDEX
             global_anchor_id = category_offset + labels(i).anchor;
             if roc_params.use_models_with_top_hardest_negatives_removed == 0
                 model_name_format_str = '%06d-svm.mat';
@@ -65,9 +70,13 @@ for model_num = 1:NMODELS
                 continue;
             end
             
-            sims = getEsvmScores(labels(i), category_offset, esvm_model_path, roc_params);
+            sims = getScores(global_anchor_id, labels(i), category_offset, esvm_model_path, roc_params, 'esvm');
             sims_esvm{i} = sims;
-            
+        elseif model_num == CORR_INDEX
+            global_anchor_id = category_offset + labels(i).anchor;
+            sims = getScores(global_anchor_id, labels(i), category_offset, '', roc_params, 'corr');
+        else
+            error('Unknown model!');
         end
         
         %check labels with no positives or negatives
@@ -120,16 +129,27 @@ for i = 1:NMODELS
 end
 fclose(fileID);
 
-save_figure(gcf, file_base);                
-save(fullfile(dataset_path, roc_params.plots_dir, sprintf('sims_%s_%s.mat', ...
+save_figure(gcf, file_base);
+if (ESVM_MODEL_INDEX)
+    save(fullfile(dataset_path, roc_params.plots_dir, sprintf('sims_%s_%s.mat', ...
                      category_name, model_name{ESVM_MODEL_INDEX})), 'sims_esvm');
-                 
-esvm_auc = auc(ESVM_MODEL_INDEX);
+    esvm_auc = auc(ESVM_MODEL_INDEX);
+end
+
+if (CORR_INDEX)
+    corr_auc = auc(CORR_INDEX);
+end
+
 end
 
 
-function scores = getEsvmScores(label, category_offset, esvm_model_path, roc_params)
-esvm_file = load(esvm_model_path);
+function scores = getScores(anchor_id, label, category_offset, esvm_model_path, roc_params, method)
+% Get scores for the labeled frames.
+% method: ['esvm', 'corr']
+
+if strcmp(method, 'esvm')
+    esvm_file = load(esvm_model_path);
+end
 
 scores = zeros(1, length(label.positives.ids) + length(label.negatives.ids));
 
@@ -139,23 +159,27 @@ flipval = [label.positives.flipval label.negatives.flipval];
 for i = 1:length(ids)
     frame_id = category_offset + ids(i);
     
-    sample = createEsvmSample(frame_id, flipval(i), roc_params);
-    scores(i) = sim_esvm.get_score(sample, esvm_file.models(1), roc_params.detect_params);
+    if strcmp(method, 'esvm')
+        sample = createEsvmSample(frame_id, flipval(i), roc_params);
+        scores(i) = sim_esvm.get_score(sample, esvm_file.models(1), roc_params.detect_params);
+    elseif strcmp(method, 'corr')
+        scores(i) = get_correlation(frame_id, flipval(i), anchor_id, 0, roc_params);
+    else
+        error('Unknown type!');
+    end
     
-%     scores(i) = get_correlation(frame_id, flipval(i), esvm_file.models{1}.frame_id, 0, roc_params);
-    
-    fprintf('ESVM::Detected img %d, score: %f\n', frame_id, scores(i));
+    fprintf('Detected img %d, score: %f\n', frame_id, scores(i));
 end
 
 end
 
 function score = get_correlation(frame_id1, flipval1, frame_id2, flipval2, roc_params)
-% Calvulate pearson correlation between 2 feature vectors of specified frames.
+% Calculate Pearson correlation between 2 feature vectors of specified frames.
     assert(roc_params.use_cnn_features == 1);
     a = createEsvmSample(frame_id1, flipval1, roc_params);
     b = createEsvmSample(frame_id2, flipval2, roc_params);
     
-    score = corr(a.feature, b.feature); 
+    score = 2 - pdist2(a.feature', b.feature', 'correlation'); 
 end
 
 function sample = createEsvmSample(frame_id, flipval, roc_params)

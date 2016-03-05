@@ -1,9 +1,10 @@
-function [aucs] = sim_esvm_many_run( create_negatives_policy, negatives_train_data_fraction, use_mining )
+function [aucs] = sim_esvm_many_run( create_negatives_policy, ...
+    negatives_train_data_fraction, use_mining, use_wieghts_auto_balancing )
 %SIM_ESVM_MANY_RUN Summary of this function goes here
 %   Detailed explanation goes here
 
-c_vals = [0.01, 1, 10];%logspace(-3, 6, 15);
-pos_class_constants = [0.001, 1, 1000];
+c_vals = [50.0, logspace(-2, 9, 9)];
+pos_class_constants = [-1];
 aucs = [];
 
 addpath(genpath('~/workspace/similarities'));
@@ -21,7 +22,7 @@ if ~exist('esvm_train_params', 'var') ...
     esvm_train_params.dataset_path = dataset_path;
     esvm_train_params.use_cnn_features = 1; % Use CNN features or HOG.
     esvm_train_params.features_path = ... % used only if use_cnn_features = 1
-        '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7_zscores.mat';
+        '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7_pre_RELU.mat';
     
     % Policy to create negative samples. 
     % Values: ['random_from_other_categories', random_from_same_category, 'negative_cliques']
@@ -38,6 +39,10 @@ if ~exist('esvm_train_params', 'var') ...
 
     esvm_train_params = sim_esvm.get_default_train_params(esvm_train_params); % add not filled required fields.
 end
+
+esvm_train_params.auto_weight_svm_classes = use_wieghts_auto_balancing;
+assert((length(pos_class_constants) == 1) || ~esvm_train_params.auto_weight_svm_classes);
+
 ESVM_NUMBER_OF_WORKERS = 1;
 
 
@@ -51,18 +56,26 @@ for svm_c = c_vals
     esvm_train_params.train_svm_c = svm_c;
     
     for pos_class_mult = pos_class_constants
-        esvm_train_params.positive_class_weight_multiplier = pos_class_mult;
+        
+        esvm_train_params.positive_class_svm_weight = pos_class_mult;
 
         
-        C_pos = esvm_train_params.train_svm_c * esvm_train_params.positive_class_weight_multiplier;
-        C_neg = esvm_train_params.train_svm_c;
+        W_pos = esvm_train_params.positive_class_svm_weight;
+        W_neg = 1;
+        
+        if esvm_train_params.auto_weight_svm_classes == 1
+            class_weights_str = 'auto_balancing';
+        else
+            class_weights_str = sprintf('Wpos%s_Wneg%s', num2str(W_pos), num2str(W_neg));
+        end
         
         %% Init dirs
         ESVM_MODELS_DIR = sprintf(['~/workspace/OlympicSports/esvm/'...
-            'alexnet_zscores_esvm_%s_models_long_jump_%s_Cpos%s_Cneg%s/'], ...
+            'alexnet_pre_RELU_esvm_%s_models_long_jump_%s_C%.4f_%s'], ...
             mining_str, ...
             esvm_train_params.create_negatives_policy, ...
-            num2str(C_pos), num2str(C_neg)); % Output dir.
+            esvm_train_params.train_svm_c, ...
+            class_weights_str); % Output dir.
 
         if exist(ESVM_MODELS_DIR, 'dir')
             rmdir(ESVM_MODELS_DIR, 's');
@@ -96,19 +109,20 @@ for svm_c = c_vals
         esvm_auc = sim_esvm_get_roc(category_name, roc_params);
         
         fprintf('Category: %s\n', category_name);
-        fprintf('Policy: %s. neg_train_data_frac: %.2f. C_pos: %.4f. C_neg: %.4f. AUC: %.4f\n', ...
+        fprintf('Policy: %s. neg_train_data_frac: %.2f.C: %.4f. %s. AUC: %.4f\n', ...
             esvm_train_params.create_negatives_policy, ...
             esvm_train_params.negatives_train_data_fraction, ...
-            esvm_train_params.train_svm_c * esvm_train_params.positive_class_weight_multiplier, ...
             esvm_train_params.train_svm_c, ...
+            class_weights_str, ...
             esvm_auc);
         
         res.auc = esvm_auc;
         res.C = esvm_train_params.train_svm_c;
-        res.pos_class_mult = esvm_train_params.positive_class_weight_multiplier;
+        res.pos_class_mult = esvm_train_params.positive_class_svm_weight;
+        res.esvm_train_params_strip = rmfield(esvm_train_params, 'create_data_params');
         aucs = [aucs res];
         
-        save(fullfile(ESVM_MODELS_DIR, 'cur_validation.mat'), '-v7.3', 'aucs');
+        save(fullfile(ESVM_MODELS_DIR, 'cur_validation.mat'), '-v7.3', 'aucs', 'use_wieghts_auto_balancing');
     end
 end
 

@@ -29,6 +29,9 @@ params.detect_keep_threshold = -1.2;
 
 params.features_type = 'HOG-like'; % ['FeatureVector' | 'HOG-like']
 
+%Should we use: W_pos = n_pos / N, W_neg = n_neg / N ?
+params.auto_weight_svm_classes = 0;
+
 params.init_params.features_type = params.features_type;
 params.init_params.features = @esvm_features;
 
