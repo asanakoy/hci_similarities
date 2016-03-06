@@ -1,15 +1,12 @@
 function [aucs] = sim_esvm_many_run( create_negatives_policy, ...
-    negatives_train_data_fraction, use_mining, use_wieghts_auto_balancing )
+    negatives_train_data_fraction, use_mining, use_wieghts_auto_balancing, training_type )
 %SIM_ESVM_MANY_RUN Summary of this function goes here
 %   Detailed explanation goes here
 
-c_vals = [50.0, logspace(-2, 9, 9)];
+c_vals = logspace(-3, 9, 21);
 pos_class_constants = [-1];
 aucs = [];
 
-addpath(genpath('~/workspace/similarities'));
-ESVM_LIB_PATH = '~/workspace/exemplarsvm';
-addpath(genpath(ESVM_LIB_PATH));
 addpath(genpath(Config.SELF_ROOT));
 
 %% Set params
@@ -23,7 +20,7 @@ if ~exist('esvm_train_params', 'var') ...
     esvm_train_params.dataset_path = dataset_path;
     esvm_train_params.use_cnn_features = 1; % Use CNN features or HOG.
     esvm_train_params.features_path = ... % used only if use_cnn_features = 1
-        '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7_pre_RELU.mat';
+        '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7_zscores.mat';
     
     % Policy to create negative samples. 
     % Values: ['random_from_other_categories', random_from_same_category, 'negative_cliques']
@@ -36,7 +33,7 @@ if ~exist('esvm_train_params', 'var') ...
     esvm_train_params.negatives_train_data_fraction = negatives_train_data_fraction; % Portion of data to use for training.
     esvm_train_params.use_negative_mining = use_mining; % Train at once or use mining?
     esvm_train_params.remove_top_hard_negatives_fraction = 0.0; % How many top hard negatives to remove.
-    esvm_train_params.training_type = 'esvm';
+    esvm_train_params.training_type = training_type;
 
     esvm_train_params = sim_esvm.get_default_train_params(esvm_train_params); % add not filled required fields.
 end
@@ -72,7 +69,8 @@ for svm_c = c_vals
         
         %% Init dirs
         ESVM_MODELS_DIR = sprintf(['~/workspace/OlympicSports/esvm/'...
-            'alexnet_pre_RELU_esvm_%s_models_long_jump_%s_C%.4f_%s'], ...
+            'alexnet_zscores_%s_%s_models_long_jump_%s_C%.4f_%s'], ...
+            esvm_train_params.training_type, ...
             mining_str, ...
             esvm_train_params.create_negatives_policy, ...
             esvm_train_params.train_svm_c, ...
