@@ -1,4 +1,4 @@
-addpath(genpath('~/workspace/similarities'));
+addpath(genpath(Config.SELF_ROOT));
 dataset_path = '~/workspace/OlympicSports';
 
 if ~exist('data_info', 'var')

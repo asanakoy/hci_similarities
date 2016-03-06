@@ -2,7 +2,7 @@ function [] = merge_features_from_all_categories()
 %MERGE_FEATURES_FROM_ALL_CATEGORIES Concat features for all categories into
 % one big matrix and save on disk.
 
-addpath(genpath('~/workspace/similarities'));
+addpath(genpath(Config.SELF_ROOT));
 dataset_path = '~/workspace/OlympicSports';
 features_input_path = '/net/hciserver03/storage/mbautist/Desktop/projects/cnn_similarities/compute_similarities/sims/';
 output_filepath = '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7_pre_RELU.mat';

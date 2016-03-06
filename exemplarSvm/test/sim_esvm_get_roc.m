@@ -1,8 +1,7 @@
 function [esvm_auc, corr_auc] = sim_esvm_get_roc(category_name, roc_params)
 %GETROC Plot ROC curve and calculate AUC.
 
-addpath(genpath('~/workspace/similarities'))
-addpath(genpath('~/workspace/exemplarsvm'))
+addpath(genpath(Config.SELF_ROOT));
 esvm_auc = -1;
 corr_auc = -1;
 

@@ -1,6 +1,4 @@
-addpath(genpath('~/workspace/similarities'));
-ESVM_LIB_PATH = '~/workspace/exemplarsvm';
-addpath(genpath(ESVM_LIB_PATH));
+addpath(genpath(Config.SELF_ROOT));
 
 sim_esvm_set_params;
 

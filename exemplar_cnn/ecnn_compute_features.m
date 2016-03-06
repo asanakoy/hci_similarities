@@ -2,7 +2,6 @@ function [] = ecnn_compute_features(category_name, data_info)
 %COMPUTECNNFEATURES Summary of this function goes here
 %   Detailed explanation goes here
 
-addpath(genpath('/export/home/asanakoy/workspace/similarities'));
 dataset_path = '/export/home/asanakoy/workspace/OlympicSports';
 
 CAFFE_ROOT = getenv('CAFFE_ROOT');

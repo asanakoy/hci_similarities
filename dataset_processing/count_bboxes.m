@@ -1,5 +1,4 @@
 function [labeled_frames_count, bboxes_count] = count_bboxes()
-    addpath(genpath('/net/hciserver03/storage/asanakoy/workspace/similarities'))
 
     dataset_dir = '/net/hciserver03/storage/asanakoy/workspace/HMDB51';
     %Extract crops from video sequences

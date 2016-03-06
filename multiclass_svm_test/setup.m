@@ -1,5 +1,4 @@
-addpath(genpath('~/workspace/similarities'));
-addpath(genpath('~/workspace/exemplarsvm'));
+addpath(genpath(Config.SELF_ROOT));
 
 MULTICLASS_SVM_DIR = '~/workspace/OlympicSports/multiclass_svm_test';
 DATASET_PATH = '~/workspace/OlympicSports/';

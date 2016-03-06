@@ -1,6 +1,5 @@
 function [ roc_params ] = get_roc_params(category_name, models_path)
 %GET_ROC_PARAMS Get deafult params for ROC plotting.
-addpath(genpath('~/workspace/similarities'))
 
 roc_params.dataset_path = '~/workspace/OlympicSports';
 roc_params.plots_dir = 'plots';

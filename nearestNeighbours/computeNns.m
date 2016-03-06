@@ -1,5 +1,4 @@
-
-addpath(genpath('/export/home/asanakoy/workspace/similarities'));
+addpath(genpath(Config.SELF_ROOT));
 
 % datase_path = '/export/home/asanakoy/workspace/OlympicSports';
 datase_path = '/export/home/asanakoy/workspace/HMDB51';

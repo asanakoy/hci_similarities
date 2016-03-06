@@ -2,7 +2,6 @@ function [] = computeCNNFeatures(category_name, data_info)
 %COMPUTECNNFEATURES Summary of this function goes here
 %   Detailed explanation goes here
 
-addpath(genpath('~/workspace/similarities'));
 dataset_path = '~/workspace/OlympicSports';
 
 CAFFE_ROOT = getenv('CAFFE_ROOT');
