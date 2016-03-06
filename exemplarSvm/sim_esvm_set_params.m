@@ -23,14 +23,14 @@ if ~exist('esvm_train_params', 'var') ...
     esvm_train_params.negatives_train_data_fraction = 0.1; % Portion of data to use for training.
     esvm_train_params.use_negative_mining = 1; % Train at once or use mining?
     esvm_train_params.remove_top_hard_negatives_fraction = 0.1; % How many top hard negatives to remove.
-    esvm_train_params.training_type = 'pos_svm';
+    esvm_train_params.training_type = 'esvm'; % ['esvm', 'clique_svm', 'pos_svm']
 
     esvm_train_params = sim_esvm.get_default_train_params(esvm_train_params); % add not filled required fields.
 end
 
-esvm_train_params.train_svm_c = 133;
+esvm_train_params.train_svm_c = 0.01;
 esvm_train_params.positive_class_svm_weight = 50;
-esvm_train_params.auto_weight_svm_classes = 1;
+esvm_train_params.auto_weight_svm_classes = 0;
 
 esvm_train_params
 esvm_train_params.create_data_params

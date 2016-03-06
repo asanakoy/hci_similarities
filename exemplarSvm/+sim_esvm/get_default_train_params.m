@@ -18,11 +18,6 @@ esvm_train_params = set_field_if_not_exist(esvm_train_params, 'features_path', .
 
 % policy for generating negative samples
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'create_negatives_policy', 'negative_cliques'); 
-if strcmp(esvm_train_params.create_negatives_policy, 'negative_cliques')
-    %TODO: set cliques_data_path
-    esvm_train_params = set_field_if_not_exist(esvm_train_params, 'cliques_data_path', '~/workspace/OlympicSports/clique-esvm/data/cliques_data.mat');
-end
-
 
 data_info = load(DatasetStructure.getDataInfoPath(esvm_train_params.dataset_path));
 
@@ -82,7 +77,12 @@ if esvm_train_params.use_cnn_features == 1
 
 end
 
-if strcmp(create_data_params.create_negatives_policy, 'negative_cliques')
+if strcmp(esvm_train_params.create_negatives_policy, 'negative_cliques') ...
+        || strcmp(esvm_train_params.training_type, 'clique_svm')
+    
+     esvm_train_params = set_field_if_not_exist(esvm_train_params, 'cliques_data_path', ...
+         '~/workspace/OlympicSports/clique-esvm/data/cliques_data.mat');
+     
     assert(exist(esvm_train_params.cliques_data_path, 'file') ~= 0, ...
         'File %s is not found', esvm_train_params.cliques_data_path);
     create_data_params.cliques_data = load(esvm_train_params.cliques_data_path);

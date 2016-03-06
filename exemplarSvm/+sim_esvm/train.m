@@ -43,6 +43,27 @@ if strcmp(esvm_train_params.training_type, 'pos_svm')
     
     positive_ids = [anchor_id, positives.ids];
     positive_flipvals = [anchor_flipval, positives.flipval];
+    
+elseif strcmp(esvm_train_params.training_type, 'clique_svm')
+    positives = sim_esvm.get_positive_clique(anchor_id, esvm_train_params.create_data_params);
+    
+    positive_ids = [anchor_id, positives.ids];
+    positive_flipvals = [anchor_flipval, positives.flipval];
+    
+    num_positives_before = length(positive_ids);
+    
+    [~, perm, ~] = unique(positive_ids);
+    positive_ids = positive_ids(perm);
+    positive_flipvals = positive_flipvals(perm);
+    
+    assert(num_positives_before <= length(positive_ids) + 1, ...
+        'We have clique with non-unique values! anchor_local_id: %d', ...
+        anchor_id - esvm_train_params.create_data_params.positive_category_offset);
+    
+    if num_positives_before == length(positive_ids)
+        fprintf('NOTE: Anchor was not in clique!\n');
+    end
+    
 else
     positive_ids = anchor_id;
     positive_flipvals = anchor_flipval;
@@ -171,7 +192,9 @@ if esvm_train_params.use_negative_mining == 0
     [models] = esvm_train_exemplars(initial_models, train_params);
     
 else
-    assert(strcmp(esvm_train_params.training_type, 'esvm') || strcmp(esvm_train_params.training_type, 'pos_svm'), ...
+    assert(strcmp(esvm_train_params.training_type, 'esvm') ...
+        || strcmp(esvm_train_params.training_type, 'pos_svm') ...
+        || strcmp(esvm_train_params.training_type, 'clique_svm'), ...
         'Negatives mining is unsupported for training_type: %s', esvm_train_params.training_type);
     
     [models] = esvm_train_exemplars_with_mining(initial_models, ...

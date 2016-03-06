@@ -1,5 +1,5 @@
 log_path = '~/tmp/esvm_log.txt';
-system(sprintf('rm %s.old && mv %s %s.old', log_path));
+system(sprintf('mv %s %s.old', log_path, log_path));
 diary(log_path);
 
 sim_esvm_init;

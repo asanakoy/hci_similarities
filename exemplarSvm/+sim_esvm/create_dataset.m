@@ -49,10 +49,10 @@ for i = 1:length(frames_ids)
             objects{i}.I.feature = params.features_data.features(frame_id, :)';
             objects{i}.I.feature_flipped = params.features_data.features_flip(frame_id, :)';
         else
-            % WARNING: should be ised only for Exemlpars! Negatives must be
-            % flipped on-line during running ESVM training.
-            % Note: actualy right now we don't support flipped exempalrs.
-            fprintf('WARNING! Flipped training sample!\n');
+            % WARNING: should be used only for Exemlpars or positive training set! Negatives must be
+            % flipped on-line during running ESVM training and thats why
+            % contain both fields 'feature' and 'feature_flipped'
+            % Note: actualy right now we don't support flipped exemplars.
             objects{i}.I.feature = params.features_data.features_flip(frame_id, :)';
         end
     end
