@@ -5,12 +5,18 @@
 %
 % Copyright (C) 2015-16 by Artsiom Sanakoyeu
 % All rights reserved. 
-function [models, M] = train(anchor_id, anchor_flipval, output_dir, ...
+function [models] = train(anchor_id, anchor_flipval, output_dir, ...
                                      esvm_train_params, initial_models)
-
 narginchk(4, 5);
-assert(length(anchor_id) == 1 && length(anchor_flipval) == 1);
 sim_esvm.check_esvm_train_params(esvm_train_params);
+
+if esvm_train_params.should_just_initialize_models == 1
+    fprintf('.Just initializing the model. No training will be performed!\n');
+    models = sim_esvm.just_initialize_model(anchor_id, anchor_flipval, output_dir, esvm_train_params);
+    return;
+end
+                                 
+assert(length(anchor_id) == 1 && length(anchor_flipval) == 1);
 assert(isfield(esvm_train_params, 'train_svm_c'));
 assert(isfield(esvm_train_params, 'positive_class_svm_weight'));
 assert(isfield(esvm_train_params, 'auto_weight_svm_classes'));
@@ -78,7 +84,7 @@ params = sim_esvm.get_default_params;
 params.dataset_params.localdir = output_dir;
 
 %================ Set params passed from outside =====================
-params = update_esvm_params(params, esvm_train_params);
+params = sim_esvm.update_esvm_params(params, esvm_train_params);
 %======================================================================
 
 %%Initialize exemplar stream

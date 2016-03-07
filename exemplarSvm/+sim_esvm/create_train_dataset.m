@@ -24,8 +24,10 @@ if strcmp(params.create_negatives_policy, 'negative_cliques')
     negative_ids = negatives_negative_cliques(positive_ids(1), params);
 elseif strcmp(params.create_negatives_policy, 'random_from_same_category')
     negative_ids = negatives_random_from_same_category(positive_ids(1), params);
-else
+elseif strcmp(params.create_negatives_policy, 'random_from_other_categories')
     negative_ids = negatives_random_from_other_categories(params);
+else
+    error('Unknown create_negatives_policy specified: %s\n', params.create_negatives_policy);
 end
 
 neg_objects = sim_esvm.create_dataset(negative_ids, params, false(size(negative_ids)));

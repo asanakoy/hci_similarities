@@ -26,7 +26,9 @@ if ~exist('esvm_train_params', 'var') ...
     esvm_train_params.remove_top_hard_negatives_fraction = 0.1; % How many top hard negatives to remove.
     esvm_train_params.training_type = 'esvm'; % ['esvm', 'clique_svm', 'pos_svm']
     
-    esvm_train_params.detect_pyramid_padding = 0;
+    esvm_train_params.detect_padding = 0;
+    
+    esvm_train_params.should_just_initialize_models = 0; % Should we just initialize Exemlars and do NOT train them?
 
     esvm_train_params = sim_esvm.get_default_train_params(esvm_train_params); % add not filled required fields.
 end
@@ -34,6 +36,7 @@ end
 esvm_train_params.train_svm_c = 0.01;
 esvm_train_params.positive_class_svm_weight = 50;
 esvm_train_params.auto_weight_svm_classes = 0;
+
 
 esvm_train_params
 esvm_train_params.create_data_params
