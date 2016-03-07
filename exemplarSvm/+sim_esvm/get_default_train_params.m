@@ -14,7 +14,7 @@ assert(~isfield(esvm_train_params, 'create_data_params'), 'Do not set esvm_train
 
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'dataset_path', '~/workspace/OlympicSports');
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'features_path', ... 
-    '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7.mat'); % used only if use_cnn_features = 1
+    '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7.mat'); % used only if use_plain_features = 1
 
 % policy for generating negative samples
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'create_negatives_policy', 'negative_cliques'); 
@@ -22,7 +22,10 @@ esvm_train_params = set_field_if_not_exist(esvm_train_params, 'create_negatives_
 data_info = load(DatasetStructure.getDataInfoPath(esvm_train_params.dataset_path));
 
 % Use CNN features or HOG.
-esvm_train_params = set_field_if_not_exist(esvm_train_params, 'use_cnn_features', 1);
+esvm_train_params = set_field_if_not_exist(esvm_train_params, 'use_plain_features', 1);
+
+% Load features from disk or generate online?
+esvm_train_params = set_field_if_not_exist(esvm_train_params, 'should_load_features_from_disk', 0);
 
 % Portion of data to use for negative mining.
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'negatives_train_data_fraction', 0.1);
@@ -42,6 +45,11 @@ esvm_train_params = set_field_if_not_exist(esvm_train_params, 'remove_top_hard_n
 % SVM training type
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'training_type', 'esvm'); % ['esvm', 'clique_svm', 'esvm_positive_clique_embedding']
 
+% Restore lost bin that were deminished after HOG-Pedro calculation.
+% Lost bin will be filled with zeros.
+esvm_train_params =  set_field_if_not_exist(esvm_train_params, 'restore_hog_lost_bin', 1);
+%How much we pad the pyramid (to let detections fall outside the image)
+esvm_train_params =  set_field_if_not_exist(esvm_train_params, 'detect_pyramid_padding', 2);
 
 LABELS_PATH = '~/workspace/dataset_labeling/merged_data_19.02.16/labels_long_jump.mat';
 fprintf('Loading labels from %s ...\n', LABELS_PATH);
@@ -49,7 +57,7 @@ fprintf('Loading labels from %s ...\n', LABELS_PATH);
 esvm_train_params.labeled_data = load(LABELS_PATH);
 
 create_data_params.dataset_path = esvm_train_params.dataset_path;
-create_data_params.use_cnn_features = esvm_train_params.use_cnn_features;
+create_data_params.use_plain_features = esvm_train_params.use_plain_features;
 create_data_params.data_info = data_info;
 create_data_params.negatives_train_data_fraction = esvm_train_params.negatives_train_data_fraction;
 % policy for generating negative samples
@@ -67,7 +75,7 @@ end
 create_data_params.crops_global_info = load(CROPS_ARRAY_FILEPATH);
 toc
 
-if esvm_train_params.use_cnn_features == 1
+if esvm_train_params.should_load_features_from_disk == 1
     fprintf('Loading features... from %s\n', esvm_train_params.features_path);
     assert(exist(esvm_train_params.features_path, 'file') ~= 0, ...
             'File %s is not found', esvm_train_params.features_path);

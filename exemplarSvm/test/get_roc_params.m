@@ -4,15 +4,15 @@ function [ roc_params ] = get_roc_params(category_name, models_path)
 roc_params.dataset_path = '~/workspace/OlympicSports';
 roc_params.plots_dir = 'plots';
 
-roc_params.use_cnn_features = 1;% ESVM Uses CNN features or HOG.
-roc_params.features_path = ... % used only if use_cnn_features = 1
     '~/workspace/OlympicSports/data/features_hog_pedro_227x227.mat';
+roc_params.use_plain_features = 1;% ESVM Uses CNN features or HOG.
+roc_params.features_path = ... % used only if use_plain_features = 1
 roc_params.esvm_crops_dir_name = 'crops_227x227';
 
 roc_params.use_models_with_top_hardest_negatives_removed = 0;
 
 % Load features into memory
-if roc_params.use_cnn_features
+if roc_params.use_plain_features
     tic;
     fprintf('Reading CNN features file... %s\n', roc_params.features_path);
     assert(exist(roc_params.features_path, 'file') ~= 0, ...
@@ -22,7 +22,7 @@ if roc_params.use_cnn_features
 end
 
 roc_params.detect_params = sim_esvm.get_default_params;
-if roc_params.use_cnn_features
+if roc_params.use_plain_features
     roc_params.detect_params.features_type = 'FeatureVector';
     if exist('models_path', 'var')
         roc_params.esvm_models_dir = models_path;

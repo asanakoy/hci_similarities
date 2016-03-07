@@ -72,27 +72,14 @@ end
 [pos_set, neg_set] = sim_esvm.create_train_dataset(positive_ids, positive_flipvals, esvm_train_params.create_data_params);
 
 
-
 %% Set exemplar-initialization parameters
 params = sim_esvm.get_default_params;
 %if localdir is not set, we do not dump files
 params.dataset_params.localdir = output_dir;
 
-params.train_svm_c = esvm_train_params.train_svm_c;
-params.positive_class_svm_weight = esvm_train_params.positive_class_svm_weight;
-%Should we use: W_pos = n_pos / N, W_neg = n_neg / N ?
-params.auto_weight_svm_classes = esvm_train_params.auto_weight_svm_classes;
-
-assert(params.auto_weight_svm_classes == 0 || esvm_train_params.use_negative_mining == 1, ...
-    'auto_weight_svm_classes not implemented for training at once!'); % TODO: implement for 'at once'.
-
-if esvm_train_params.use_cnn_features
-    params.features_type = 'FeatureVector';
-    params.init_params.features_type = params.features_type;
-    params.init_params.features = @sim_esvm.cnnfeatures; % NOTE: Not used now. Features are precomputed. 
-    params.dataset_params.display = 0; % display is not implemented for FeatureVector
-    params.dump_images = 0; % dump_images is not implemented for FeatureVector
-end
+%================ Set params passed from outside =====================
+params = update_esvm_params(params, esvm_train_params);
+%======================================================================
 
 %%Initialize exemplar stream
 stream_params.stream_set_name = 'trainval';
@@ -246,42 +233,5 @@ if esvm_train_params.should_run_test
     %allbbs = esvm_show_top_dets(test_struct, test_grid, test_set, models, ...
     %                       params, maxk, test_set_name);
 end
-end
 
-function [models] = remove_top_hardest_negatives(models, neg_set, esvm_train_params)
-   %% Remove the hardest negatives
-    PART_OF_NEGATIVES_TO_REMOVE = esvm_train_params.remove_top_hard_negatives_fraction;
-    fprintf('Dropping %f%% of the top hardest negatives...\n', PART_OF_NEGATIVES_TO_REMOVE * 100);
-    for i = 1:length(models)
-        scores = models{i}.model.w(:)' * models{i}.model.svxs - models{i}.model.b;
-        [~, idx] = sort(scores,'descend');
-        new_start = ceil(PART_OF_NEGATIVES_TO_REMOVE * length(idx));
-        idx = idx(new_start:end);
-        models{i}.model.svxs = models{i}.model.svxs(:,idx);
-        
-        if esvm_train_params.use_negative_mining == 0
-            models{i} = esvm_train_svm_at_once(models{i}, models{i}.model.svxs);
-        else
-            models{i}.model.svbbs = models{i}.model.svbbs(idx,:);
-
-            models{i} = esvm_update_svm(models{i});
-            cur_iter = models{i}.iteration + 1;
-            models{i}.iteration = cur_iter;  
-            models{i}.mining_stats{cur_iter}.num_epty = 0;
-            models{i}.mining_stats{cur_iter}.num_violating = 0;
-            models{i}.mining_stats{cur_iter}.total_mines = 0;
-            models{i}.mining_stats{cur_iter}.comment = sprintf('cutted_%.2f_top_hard_neg', PART_OF_NEGATIVES_TO_REMOVE);
-        end
-        
-        if models{1}.mining_params.dump_images == 1
-            esvm_dump_figures(models{i}, neg_set);
-        end
-    end
-        filer2 = fullfile(models{i}.dataset_params.localdir, [models{i}.models_name '-removed_top_hrd.mat']);
-%         %Save the result
-        savem(filer2, models{i});
-end
-
-function savem(filer2, models) %#ok<INUSD>
-    save(filer2, 'models');
 end

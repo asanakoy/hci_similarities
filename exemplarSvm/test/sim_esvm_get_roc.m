@@ -174,7 +174,7 @@ end
 
 function score = get_correlation(frame_id1, flipval1, frame_id2, flipval2, roc_params)
 % Calculate Pearson correlation between 2 feature vectors of specified frames.
-    assert(roc_params.use_cnn_features == 1);
+    assert(roc_params.use_plain_features == 1);
     a = createEsvmSample(frame_id1, flipval1, roc_params);
     b = createEsvmSample(frame_id2, flipval2, roc_params);
     
@@ -182,16 +182,16 @@ function score = get_correlation(frame_id1, flipval1, frame_id2, flipval2, roc_p
 end
 
 function sample = createEsvmSample(frame_id, flipval, roc_params)
-% If use_cnn_features == 1 return ImageStruct.
+% If use_plain_features == 1 return ImageStruct.
 %   ImageStruct fields:
 %                       id - image id,
 %                       flipval - 1 if it is flipped, 0 - otherwise, 
 %                       feature - feature representation of the
 %                                           image.
 %
-% If use_cnn_features == 0 return RGB image.
+% If use_plain_features == 0 return RGB image.
 
-    if roc_params.use_cnn_features == 0
+    if roc_params.use_plain_features == 0
         if roc_params.should_use_crops_info == 1
             image_path = fullfile(roc_params.dataset_path, ...
                 roc_params.esvm_crops_dir_name, ...

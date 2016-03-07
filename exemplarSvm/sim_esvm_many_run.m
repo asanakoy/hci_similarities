@@ -18,8 +18,8 @@ if ~exist('esvm_train_params', 'var') ...
     fprintf('Setting train params...');
     esvm_train_params = struct();
     esvm_train_params.dataset_path = dataset_path;
-    esvm_train_params.use_cnn_features = 1; % Use CNN features or HOG.
-    esvm_train_params.features_path = ... % used only if use_cnn_features = 1
+    esvm_train_params.use_plain_features = 1; % Use CNN features or HOG.
+    esvm_train_params.features_path = ... % used only if use_plain_features = 1
         '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7_zscores.mat';
     
     % Policy to create negative samples. 

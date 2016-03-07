@@ -14,6 +14,7 @@ params.init_params.detect_min_scale = params.detect_min_scale;
 params.detect_levels_per_octave = 1;
 %How much we pad the pyramid (to let detections fall outside the image)
 params.detect_pyramid_padding = 2; % size of the window shifting
+
 %Maximum #windows per exemplar (per image) to keep. I.e. how many
 %detections are allowed inside one image (flipped and non-flipped are
 %counted as different images;
@@ -46,7 +47,7 @@ params.dataset_params.display = 0;
 params.dataset_params.localdir = '';
 
 %if enabled, we dump learning images into results directory
-params.dump_images = 1;
+params.dump_images = 0;
 
 end
 
