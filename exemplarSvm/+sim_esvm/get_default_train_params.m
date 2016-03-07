@@ -47,9 +47,10 @@ esvm_train_params = set_field_if_not_exist(esvm_train_params, 'training_type', '
 
 % Restore lost bin that were deminished after HOG-Pedro calculation.
 % Lost bin will be filled with zeros.
-esvm_train_params =  set_field_if_not_exist(esvm_train_params, 'restore_hog_lost_bin', 1);
+esvm_train_params =  set_field_if_not_exist(esvm_train_params, 'restore_hog_lost_bin', 0);
+
 %How much we pad the pyramid (to let detections fall outside the image)
-esvm_train_params =  set_field_if_not_exist(esvm_train_params, 'detect_pyramid_padding', 2);
+esvm_train_params =  set_field_if_not_exist(esvm_train_params, 'detect_pyramid_padding', 0);
 
 LABELS_PATH = '~/workspace/dataset_labeling/merged_data_19.02.16/labels_long_jump.mat';
 fprintf('Loading labels from %s ...\n', LABELS_PATH);

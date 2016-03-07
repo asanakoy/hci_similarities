@@ -9,7 +9,7 @@ detect_params.detect_max_windows_per_exemplar = 1;
 %Turn on image flips for detection/training. If enabled, processing
 %happes on each image as well as its left-right flipped version.
 detect_params.detect_add_flip = 0; % No flipping
-detect_params.detect_pyramid_padding = 1; % size of the window shifting
+detect_params.detect_pyramid_padding = 0; % size of the window shifting
 detect_params.detect_keep_threshold = -1e9; % keep all detections
 
 if strcmp(detect_params.features_type, 'HOG-like')

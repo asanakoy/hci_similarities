@@ -13,7 +13,7 @@ params.init_params.detect_min_scale = params.detect_min_scale;
 %detection/training)
 params.detect_levels_per_octave = 1;
 %How much we pad the pyramid (to let detections fall outside the image)
-params.detect_pyramid_padding = 2; % size of the window shifting
+params.detect_pyramid_padding = 0; % size of the window shifting
 
 %Maximum #windows per exemplar (per image) to keep. I.e. how many
 %detections are allowed inside one image (flipped and non-flipped are
@@ -32,6 +32,9 @@ params.features_type = 'HOG-like'; % ['FeatureVector' | 'HOG-like']
 
 %Should we use: W_pos = n_pos / N, W_neg = n_neg / N ?
 params.auto_weight_svm_classes = 0;
+
+params.should_load_features_from_disk = 0;
+params.init_params.should_load_features_from_disk = params.should_load_features_from_disk;
 
 params.init_params.features_type = params.features_type;
 params.init_params.features = @esvm_features;

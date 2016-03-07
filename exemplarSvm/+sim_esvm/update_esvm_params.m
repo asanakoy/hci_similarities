@@ -5,6 +5,7 @@ function [ esvm_params ] = update_esvm_params( esvm_params, train_params )
 esvm_params.train_svm_c = train_params.train_svm_c;
 esvm_params.positive_class_svm_weight = train_params.positive_class_svm_weight;
 esvm_params.auto_weight_svm_classes = train_params.auto_weight_svm_classes;
+
 esvm_params.should_load_features_from_disk = train_params.should_load_features_from_disk;
 esvm_params.init_params.should_load_features_from_disk = train_params.should_load_features_from_disk;
 

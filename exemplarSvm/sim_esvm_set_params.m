@@ -26,7 +26,6 @@ if ~exist('esvm_train_params', 'var') ...
     esvm_train_params.remove_top_hard_negatives_fraction = 0.1; % How many top hard negatives to remove.
     esvm_train_params.training_type = 'esvm'; % ['esvm', 'clique_svm', 'pos_svm']
     
-    esvm_train_params.restore_hog_lost_bin = 0;
     esvm_train_params.detect_pyramid_padding = 0;
 
     esvm_train_params = sim_esvm.get_default_train_params(esvm_train_params); % add not filled required fields.
