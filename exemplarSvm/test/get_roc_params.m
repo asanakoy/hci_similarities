@@ -4,25 +4,37 @@ function [ roc_params ] = get_roc_params(category_name, models_path)
 roc_params.dataset_path = '~/workspace/OlympicSports';
 roc_params.plots_dir = 'plots';
 
-    '~/workspace/OlympicSports/data/features_hog_pedro_227x227.mat';
 roc_params.use_plain_features = 1;% ESVM Uses CNN features or HOG.
+roc_params.should_load_features_from_disk = 1;
 roc_params.features_path = ... % used only if use_plain_features = 1
+    '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7_zscores.mat';
+
 roc_params.esvm_crops_dir_name = 'crops_227x227';
 
 roc_params.use_models_with_top_hardest_negatives_removed = 0;
 
+
+roc_params.data_info = load(DatasetStructure.getDataInfoPath(roc_params.dataset_path));
+if ~isfield(roc_params.data_info, 'dataset_path')
+    roc_params.data_info.dataset_path = roc_params.dataset_path;
+end
+
 % Load features into memory
-if roc_params.use_plain_features
+if roc_params.should_load_features_from_disk == 1
     tic;
     fprintf('Reading CNN features file... %s\n', roc_params.features_path);
     assert(exist(roc_params.features_path, 'file') ~= 0, ...
                 'File %s is not found', roc_params.features_path);
-    roc_params.features_data = load(roc_params.features_path, 'features', 'features_flip');
+    
+    category_offset =  get_category_offset(category_name, roc_params.data_info);
+    category_size = get_category_size(category_name, roc_params.data_info);
+    roc_params.features_data = sim_esvm.FeaturesContainer(roc_params.features_path, ...
+                                                 category_offset, category_size);
     toc
 end
 
 roc_params.detect_params = sim_esvm.get_default_params;
-if roc_params.use_plain_features
+if roc_params.use_plain_features == 1
     roc_params.detect_params.features_type = 'FeatureVector';
     if exist('models_path', 'var')
         roc_params.esvm_models_dir = models_path;
@@ -45,11 +57,7 @@ else
     roc_params.esvm_name = 'ESVM-HOG';
 end
 
-
-roc_params.data_info = load(DatasetStructure.getDataInfoPath(roc_params.dataset_path));
-if ~isfield(roc_params.data_info, 'dataset_path')
-    roc_params.data_info.dataset_path = roc_params.dataset_path;
-end
+roc_params.detect_params.should_load_features_from_disk = roc_params.should_load_features_from_disk;
 
 roc_params.should_use_crops_info = 1; % Use crops_info file to get fetch image patches.
 if roc_params.should_use_crops_info == 1

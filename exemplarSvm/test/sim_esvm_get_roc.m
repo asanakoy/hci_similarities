@@ -207,11 +207,8 @@ function sample = createEsvmSample(frame_id, flipval, roc_params)
         sample = im;
     else
         sample.id = frame_id;
-        if ~flipval
-            sample.feature = roc_params.features_data.features(frame_id, :)';
-        else
-            sample.feature = roc_params.features_data.features_flip(frame_id, :)';
-        end
+        sample.feature = roc_params.features_data.get_feature(frame_id, flipval)';
+
     end
 end
 
