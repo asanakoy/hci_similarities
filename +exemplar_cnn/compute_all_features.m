@@ -13,7 +13,7 @@ features_flip = [];
 for i = 1:length(data_info.categoryNames)
     fprintf('Calculation ECNN features for %s...\n', data_info.categoryNames{i});
     
-    ecnn_compute_features(data_info.categoryNames{i}, data_info, output_dirpath)
+    exemplar_cnn.compute_features(data_info.categoryNames{i}, data_info, output_dirpath)
 
 end
 

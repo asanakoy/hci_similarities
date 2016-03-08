@@ -72,7 +72,7 @@ for i = 1:category_size
         continue;
     end
     
-    patches = ecnn_get_random_patches(image);
+    patches = exemplar_cnn.get_random_patches(image);
     
     feature_vector = [];
     for current_patch = patches
@@ -91,8 +91,8 @@ for i = 1:category_size
 end
 fprintf('\n');
 
-features = zscores(features);
-features_flip = zscores(features_flip);
+features = zscore(features);
+features_flip = zscore(features_flip);
 
 fprintf('features data size: %s\n', mat2str(size(features)));
 whos features
