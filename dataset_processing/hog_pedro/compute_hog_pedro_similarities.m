@@ -1,14 +1,14 @@
-function [] = compute_hog_pedro_similarities( dataset_path, category_name, ...
-                                              hog_pedro_path, hog_file_flipped, output_path )
+function [] = compute_hog_pedro_similarities( category_name, dataset_path,  ...
+                                              hog_pedro_path, hog_pedro_flipped_path, output_path )
 % Calculate intra-category pairwise correlations between
 % pedro-HOG representations of the samples from specified category. 
+narginchk(1, 5);
 
-if nargin == 0
+if nargin == 1 
     dataset_path = '~/workspace/OlympicSports/';
-    category_name = 'long_jump';
     hog_pedro_path = '~/workspace/OlympicSports/data/hog_pedro_227x227_nonflipped.mat';
     hog_pedro_flipped_path = '~/workspace/OlympicSports/data/hog_pedro_227x227_flipped.mat';
-    output_path = '~/workspace/OlympicSports/sim_pedro_hog/sim_hog_pedro_long_jump.mat';
+    output_path = sprintf('~/workspace/OlympicSports/sim_pedro_hog/sim_hog_pedro_%s.mat', category_name);
 end
 
 fprintf('Loading data info... ');

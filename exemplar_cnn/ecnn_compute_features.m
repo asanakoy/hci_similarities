@@ -1,4 +1,4 @@
-function [] = ecnn_compute_features(category_name, data_info)
+function [] = ecnn_compute_features(category_name, data_info, output_dir)
 %COMPUTECNNFEATURES Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -22,13 +22,11 @@ models = {'exemplar_cnn'};
 model = models{1};
 
 %check file existance
-pathsave = '/export/home/asanakoy/workspace/OlympicSports/exemplar_cnn/features/fc7';
-file_to_save = fullfile(pathsave,[model,'_',category_name,'_Features_fc7_15_patches.mat']);
+pathsave = '/export/home/asanakoy/workspace/OlympicSports/exemplar_cnn/features/features';
+
+file_to_save = fullfile(output_dir, sprintf('features_%s_ecnn_fc5_15patches_zscores.mat', category_name));
 if exist(file_to_save, 'file')
     fprintf('Skip. File %s already exists!\n', file_to_save);
-    fprintf('Loading and resaving in format -v7.3\n');
-    load(file_to_save);
-    save(file_to_save, '-v7.3', 'conv3');
     return
 end
 
@@ -59,7 +57,9 @@ while category_offset + 1 + category_size <= data_info.totalNumberOfVectors && .
 end
 
 category_size
-fc7 = cell(category_size, 1);
+FEATURE_SIZE = 15 * 8000;
+features = zeros(category_size, FEATURE_SIZE, 'single');
+features_flip = zeros(category_size, FEATURE_SIZE, 'single');
 
 fprintf('Running forward propagation on %s\n', category_name);
 progress_struct = init_progress_string('Image:', category_size, 50);
@@ -73,20 +73,31 @@ for i = 1:category_size
     end
     
     patches = ecnn_get_random_patches(image);
+    
     feature_vector = [];
     for current_patch = patches
         nn_output = net.forward(current_patch); 
-        feature_vector = [feature_vector; nn_output{1}];
+        feature_vector = [feature_vector, nn_output{1}'];
     end
-    fc7{i} = feature_vector;
+    features(i, :) = single(feature_vector);
+    
+    feature_vector_flip = [];
+    for current_patch = patches
+        nn_output = net.forward(utils.fliplr(current_patch)); 
+        feature_vector_flip = [feature_vector_flip, nn_output{1}'];
+    end
+    features_flip(i, :) = single(feature_vector_flip);
 
 end
 fprintf('\n');
 
-fprintf('fc7 data size: %d x %d', size(fc7,1), size(fc7,2));
-whos fc7
-fprintf('each feature vector size: %s\n', mat2str(size(fc7{1})));
+features = zscores(features);
+features_flip = zscores(features_flip);
+
+fprintf('features data size: %s\n', mat2str(size(features)));
+whos features
+fprintf('each feature vector size: %s\n', mat2str(size(features(1,:))));
 fprintf('Saving on disk...\n');
-save(file_to_save, '-v7.3', 'fc7');
+save(file_to_save, '-v7.3', 'features', 'feature_vector_flip');
 
 end
