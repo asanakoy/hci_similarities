@@ -24,8 +24,7 @@ assert(isfield(esvm_train_params, 'auto_weight_svm_classes'));
 data_info = esvm_train_params.create_data_params.data_info;
 
 category_name = data_info.categoryNames{data_info.categoryLookupTable(anchor_id)};
-esvm_train_params.create_data_params.positive_category_name = category_name;
-esvm_train_params.create_data_params.positive_category_offset = get_category_offset(category_name, data_info);
+assert(strcmp(esvm_train_params.positive_category_name, category_name) == 1);
 
 
 fprintf('->sim_esvm.train ...\n')

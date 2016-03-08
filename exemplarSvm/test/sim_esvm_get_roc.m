@@ -160,7 +160,7 @@ for i = 1:length(ids)
     
     if strcmp(method, 'esvm')
         sample = createEsvmSample(frame_id, flipval(i), roc_params);
-        scores(i) = sim_esvm.get_score(sample, esvm_file.models(1), roc_params.detect_params);
+        scores(i) = sim_esvm.detection.get_score(sample, esvm_file.models(1), roc_params.detect_params);
     elseif strcmp(method, 'corr')
         scores(i) = get_correlation(frame_id, flipval(i), anchor_id, 0, roc_params);
     else
@@ -174,11 +174,11 @@ end
 
 function score = get_correlation(frame_id1, flipval1, frame_id2, flipval2, roc_params)
 % Calculate Pearson correlation between 2 feature vectors of specified frames.
-    assert(roc_params.use_plain_features == 1);
+    assert(roc_params.should_load_features_from_disk == 1);
     a = createEsvmSample(frame_id1, flipval1, roc_params);
     b = createEsvmSample(frame_id2, flipval2, roc_params);
     
-    score = 2 - pdist2(a.feature', b.feature', 'correlation'); 
+    score = 2 - pdist2(a.feature(:)', b.feature(:)', 'correlation'); 
 end
 
 function sample = createEsvmSample(frame_id, flipval, roc_params)
@@ -191,7 +191,7 @@ function sample = createEsvmSample(frame_id, flipval, roc_params)
 %
 % If use_plain_features == 0 return RGB image.
 
-    if roc_params.use_plain_features == 0
+    if roc_params.should_load_features_from_disk == 0
         if roc_params.should_use_crops_info == 1
             image_path = fullfile(roc_params.dataset_path, ...
                 roc_params.esvm_crops_dir_name, ...
@@ -207,8 +207,7 @@ function sample = createEsvmSample(frame_id, flipval, roc_params)
         sample = im;
     else
         sample.id = frame_id;
-        sample.feature = roc_params.features_data.get_feature(frame_id, flipval)';
-
+        sample.feature = roc_params.features_data.get_feature(frame_id, flipval, roc_params.use_plain_features);
     end
 end
 

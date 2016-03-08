@@ -33,7 +33,6 @@ classdef FeaturesContainer
             assert(isprop(file, 'features'));
             assert(isprop(file, 'features_flip'));
             features_size = size(file, 'features');
-            assert(features_size(1) >= category_size);
             
             obj.file = file;
             obj.is_single_category_file = is_single_category_file;
@@ -47,8 +46,12 @@ classdef FeaturesContainer
                 first_feature_offset = 0;
             end
             
+            assert(features_size(1) >= first_feature_offset + category_size, ...
+                'Features size(%d) is less then first_feature_offset + category_size (%d)', ...
+                features_size(1), first_feature_offset + category_size);
+            
             fprintf('Caching %d features for category...\n', category_size);
-           
+            tic;
             if length(features_size) == 2
                 fprintf('.Feature size: %s\n', mat2str(size(file.features(1,:))));
                 obj.is_plain_features = 1;
@@ -72,17 +75,30 @@ classdef FeaturesContainer
             else
                 error('Unknown features matrix size: %s', mat2file(file.features));
             end
+            toc
                
         end
         
         
-        function feature = get_feature(obj, frame_id, flipval)
+        function feature = get_feature(obj, frame_id, flipval, should_transpose)
+            if ~exist('should_transpose', 'var')
+                should_transpose = 0;
+            end
             assert(flipval == 0 || flipval == 1);
+            
             if obj.category_offset < frame_id &&  frame_id <= obj.category_offset + obj.category_size
                 feature = obj.feature_getter(obj.category_cached_features{flipval + 1}, frame_id - obj.category_offset);
             else
                 fprintf('WARNING! Reading feature from disk.\n');
                 feature = read_feature_from_disk(obj, frame_id, flipval);
+            end
+            feature = squeeze(feature);
+            fprintf('Feature size: %s\n', mat2str(size(feature)));
+            
+            if should_transpose == 1
+                num_dimensions = length(size(feature));
+                feature = permute(feature, num_dimensions:-1:1);
+                fprintf('Transposed feature size: %s\n', mat2str(size(feature)));
             end
         end
         

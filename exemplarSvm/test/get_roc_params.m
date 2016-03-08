@@ -4,10 +4,11 @@ function [ roc_params ] = get_roc_params(category_name, models_path)
 roc_params.dataset_path = '~/workspace/OlympicSports';
 roc_params.plots_dir = 'plots';
 
-roc_params.use_plain_features = 1;% ESVM Uses CNN features or HOG.
+roc_params.use_plain_features = 0;% ESVM Uses Plain features or Spatial.
 roc_params.should_load_features_from_disk = 1;
+is_single_category_features_file = 1;
 roc_params.features_path = ... % used only if use_plain_features = 1
-    '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7_zscores.mat';
+    '~/workspace/OlympicSports/alexnet/features/features_long_jump_imagenet-alexnet_iter_0_conv5.mat';
 
 roc_params.esvm_crops_dir_name = 'crops_227x227';
 
@@ -21,7 +22,6 @@ end
 
 % Load features into memory
 if roc_params.should_load_features_from_disk == 1
-    tic;
     fprintf('Reading CNN features file... %s\n', roc_params.features_path);
     assert(exist(roc_params.features_path, 'file') ~= 0, ...
                 'File %s is not found', roc_params.features_path);
@@ -29,8 +29,7 @@ if roc_params.should_load_features_from_disk == 1
     category_offset =  get_category_offset(category_name, roc_params.data_info);
     category_size = get_category_size(category_name, roc_params.data_info);
     roc_params.features_data = sim_esvm.FeaturesContainer(roc_params.features_path, ...
-                                                 category_offset, category_size);
-    toc
+                                                 category_offset, category_size, is_single_category_features_file);
 end
 
 roc_params.detect_params = sim_esvm.get_default_params;
@@ -48,10 +47,7 @@ else
     if exist('models_path', 'var')
         roc_params.esvm_models_dir = models_path;
     else
-        ESVM_DATA_FRACTION_STR = '0.1';
-        ROUND_STR = '1';
-        roc_params.esvm_models_dir = ['esvm/esvm_models_all_' ESVM_DATA_FRACTION_STR '_round' ROUND_STR];
-    %     roc_params.esvm_models_dir = 'esvm/esvm_long_jump_test';
+        roc_params.esvm_models_dir = 'esvm/alexnet_conv5_post_RELU_initialization_esvm_model';
         roc_params.esvm_models_dir = fullfile(roc_params.dataset_path, roc_params.esvm_models_dir);
     end
     roc_params.esvm_name = 'ESVM-HOG';

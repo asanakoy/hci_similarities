@@ -8,9 +8,12 @@ if ~exist('esvm_train_params', 'var') ...
     esvm_train_params = struct();
     esvm_train_params.dataset_path = dataset_path;
         '~/workspace/OlympicSports/alexnet/features/features_all_alexnet_fc7_zscores.mat';
-    esvm_train_params.use_plain_features = 0; % Use CNN features or HOG.
-    esvm_train_params.should_load_features_from_disk = 0;
+    esvm_train_params.positive_category_name = 'long_jump';
+    esvm_train_params.use_plain_features = 0; % Use plain features or spatial (like HOG).
+    esvm_train_params.should_load_features_from_disk = 1;
+    esvm_train_params.is_single_category_features_file = 1;
     esvm_train_params.features_path = ... % used only if should_load_features_from_disk = 1
+        '~/workspace/OlympicSports/alexnet/features/features_long_jump_imagenet-alexnet_iter_0_conv5.mat';
     
     % Policy to create negative samples. 
     % Values: ['random_from_other_categories', random_from_same_category, 'negative_cliques']

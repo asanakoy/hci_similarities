@@ -41,22 +41,23 @@ for i = 1:length(frames_ids)
     end
     objects{i}.I.id = frame_id;
     objects{i}.I.flipval = flipvals(i);
-    if params.use_plain_features
+    if params.should_load_features_from_disk == 1
         assert(isfield(params, 'features_data'));
-        assert(frame_id <= size(params.features_data.features, 1), ...
-            'frame_id %d is out of bounds. Max feature index is: %d', frame_id, size(params.features_data.features, 1));
+%         assert(frame_id <= size(params.features_data.features, 1), ...
+%             'frame_id %d is out of bounds. Max feature index is: %d', frame_id, size(params.features_data.features, 1));
         if ~flipvals(i)
-            objects{i}.I.feature = params.features_data.features(frame_id, :)';
-            objects{i}.I.feature_flipped = params.features_data.features_flip(frame_id, :)';
+            objects{i}.I.feature = params.features_data.get_feature(frame_id, 0, params.use_plain_features);
+            objects{i}.I.feature_flipped = params.features_data.get_feature(frame_id, 1, params.use_plain_features);
         else
             % WARNING: should be used only for Exemlpars or positive training set! Negatives must be
             % flipped on-line during running ESVM training and thats why
             % contain both fields 'feature' and 'feature_flipped'
             % Note: actualy right now we don't support flipped exemplars.
-            objects{i}.I.feature = params.features_data.features_flip(frame_id, :)';
+            objects{i}.I.feature = params.features_data.get_feature(frame_id, 1, params.use_plain_features);
         end
     end
     
+    objects{i}.I.imgsize = IMAGE_SIZE;
     objects{i}.recs.imgsize = IMAGE_SIZE;
     objects{i}.recs.cname = params.crops_global_info.crops(frame_id).cname;
     objects{i}.recs.objects(1).frame_id = frame_id;

@@ -6,10 +6,8 @@ function [ esvm_train_params ] = get_default_train_params(esvm_train_params)
 
 %% Setting esvm_train_params
 % =========================================================================
-if ~exist('esvm_train_params', 'var')
-    esvm_train_params = struct();
-end
-
+narginchk(1, 1);
+assert(isfield(esvm_train_params, 'positive_category_name') && ~isempty(esvm_train_params.positive_category_name));
 assert(~isfield(esvm_train_params, 'create_data_params'), 'Do not set esvm_train_params.create_data_params from outside!');
 
 esvm_train_params = set_field_if_not_exist(esvm_train_params, 'dataset_path', '~/workspace/OlympicSports');
@@ -62,11 +60,14 @@ esvm_train_params.labeled_data = load(LABELS_PATH);
 
 create_data_params.dataset_path = esvm_train_params.dataset_path;
 create_data_params.use_plain_features = esvm_train_params.use_plain_features;
+create_data_params.should_load_features_from_disk = esvm_train_params.should_load_features_from_disk;
 create_data_params.data_info = data_info;
 create_data_params.negatives_train_data_fraction = esvm_train_params.negatives_train_data_fraction;
 % policy for generating negative samples
 create_data_params.create_negatives_policy = esvm_train_params.create_negatives_policy;  
 
+create_data_params.positive_category_name = esvm_train_params.positive_category_name;
+create_data_params.positive_category_offset = get_category_offset(esvm_train_params.positive_category_name, data_info);
 
 tic;
 if esvm_train_params.use_image_pathes
@@ -81,12 +82,16 @@ toc
 
 if esvm_train_params.should_load_features_from_disk == 1
     fprintf('Loading features... from %s\n', esvm_train_params.features_path);
+    assert(isfield(esvm_train_params, 'is_single_category_features_file'));
+    
     assert(exist(esvm_train_params.features_path, 'file') ~= 0, ...
             'File %s is not found', esvm_train_params.features_path);
-    create_data_params.features_data = load(esvm_train_params.features_path, 'features', 'features_flip');
-    assert(isfield(create_data_params.features_data, 'features'));
-    assert(isfield(create_data_params.features_data, 'features_flip'));
-
+    
+    category_size = get_category_size(esvm_train_params.positive_category_name, data_info);
+    create_data_params.features_data = sim_esvm.FeaturesContainer(esvm_train_params.features_path, ...
+                                                 create_data_params.positive_category_offset, ...
+                                                 category_size, ...
+                                                 esvm_train_params.is_single_category_features_file);                                        
 end
 
 if strcmp(esvm_train_params.create_negatives_policy, 'negative_cliques') ...

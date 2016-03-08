@@ -31,14 +31,12 @@ model_name = sprintf('%06d', anchor_id); % category name
 params = sim_esvm.get_default_params;
 %if localdir is not set, we do not dump files
 params.dataset_params.localdir = output_dir;
+
+%================ Set params passed from outside =====================
+params = sim_esvm.update_esvm_params(params, esvm_train_params);
 params.dump_images = 0;
 params.dataset_params.display = 0;
-
-if esvm_train_params.use_plain_features == 1
-    params.features_type = 'FeatureVector';
-    params.init_params.features_type = params.features_type;
-    params.init_params.features = @sim_esvm.cnnfeatures; % NOTE: Not used now. Features are precomputed. 
-end
+%======================================================================
 
 %%Initialize exemplar stream
 stream_params.stream_set_name = 'trainval';
