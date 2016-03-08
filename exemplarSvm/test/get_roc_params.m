@@ -5,8 +5,8 @@ roc_params.dataset_path = '~/workspace/OlympicSports';
 roc_params.plots_dir = 'plots';
 
 roc_params.use_plain_features = 0;% ESVM Uses Plain features or Spatial.
-roc_params.should_load_features_from_disk = 1;
-is_single_category_features_file = 1;
+roc_params.should_load_features_from_disk = 0;
+is_single_category_features_file = 0;
 roc_params.features_path = ... % used only if use_plain_features = 1
     '~/workspace/OlympicSports/alexnet/features/features_long_jump_imagenet-alexnet_iter_0_conv5.mat';
 
@@ -50,7 +50,7 @@ else
         roc_params.esvm_models_dir = 'esvm/alexnet_conv5_post_RELU_initialization_esvm_model';
         roc_params.esvm_models_dir = fullfile(roc_params.dataset_path, roc_params.esvm_models_dir);
     end
-    roc_params.esvm_name = 'ESVM-HOG';
+    roc_params.esvm_name = 'standard_esvm_HOG_no-pad';
 end
 
 roc_params.detect_params.should_load_features_from_disk = roc_params.should_load_features_from_disk;

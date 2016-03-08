@@ -13,9 +13,6 @@ end
 dataset_path = roc_params.dataset_path;
 load(roc_params.labels_filepath);
 
-% ESVM_DATA_FRACTION_STR = '0.1';
-% ROUND_STR = '1';
-% model_name = {'HOG-LDA', roc_params.esvm_name};
 model_name = {roc_params.esvm_name, 'corr'};
 ESVM_MODEL_INDEX = find(cellfun(@(x) strcmp(x, roc_params.esvm_name), model_name));
 SIM_MATRIX_MODEL_INDEX = find(cellfun(@(x) strncmpi(x, 'SIM', 3), model_name));

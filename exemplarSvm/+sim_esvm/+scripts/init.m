@@ -1,3 +1,6 @@
+function [esvm_train_params, ESVM_MODELS_DIR, labels_dir_path] = init( positive_category_name )
+%INIT Summary of this function goes here
+
 dataset_path = '~/workspace/OlympicSports';
 
 % ESVM_MODELS_DIR_PREVIOUS_ROUND = '~/workspace/OlympicSports/esvm_models_all_0.1_round1';
@@ -7,7 +10,7 @@ if ~exist('esvm_train_params', 'var') ...
     fprintf('Setting train params...');
     esvm_train_params = struct();
     esvm_train_params.dataset_path = dataset_path;
-    esvm_train_params.positive_category_name = 'long_jump';
+    esvm_train_params.positive_category_name = positive_category_name;
     esvm_train_params.use_plain_features = 0; % Use plain features or spatial (like HOG).
     esvm_train_params.should_load_features_from_disk = 0;
     esvm_train_params.is_single_category_features_file = 0;
@@ -39,6 +42,7 @@ esvm_train_params.train_svm_c = 0.01;
 esvm_train_params.positive_class_svm_weight = 50;
 esvm_train_params.auto_weight_svm_classes = 0;
 
+labels_dir_path = sprintf('~/workspace/dataset_labeling/merged_data_19.02.16/labels_%s.mat', positive_category_name);
 
 esvm_train_params
 esvm_train_params.create_data_params
@@ -46,10 +50,31 @@ esvm_train_params.create_data_params
 % pause;
 
 ESVM_MODELS_DIR = sprintf(['~/workspace/OlympicSports/esvm/'...
-    'standard_esvm_no-pad_mining_%d_models_long_jump_%s_c%s_Wpos%d/'], ...
+    'standard_esvm_no-pad_mining_%d_models_%s_%s_c%s_Wpos%d/'], ...
     esvm_train_params.use_negative_mining, ...
+    esvm_train_params.positive_category_name, ...
     esvm_train_params.create_negatives_policy, ...
     num2str(esvm_train_params.train_svm_c), ...
     esvm_train_params.positive_class_svm_weight); % Output dir.
 
-ESVM_NUMBER_OF_WORKERS = 1;
+
+if exist(ESVM_MODELS_DIR, 'dir')
+    prompt = sprintf('Do you want to delete existing folder %s? yes/N [N]: ', ESVM_MODELS_DIR);
+    str = input(prompt,'s');
+    if strcmp(str, 'yes')
+        rmdir(ESVM_MODELS_DIR, 's');
+        fprintf('Deleted %s.\n', ESVM_MODELS_DIR);
+        mkdir(ESVM_MODELS_DIR);
+    end
+else
+    mkdir(ESVM_MODELS_DIR);
+end
+
+struct2File(esvm_train_params, fullfile(ESVM_MODELS_DIR, 'esvm_train_params.txt'), 'align', true);
+struct2File(esvm_train_params.create_data_params, ...
+    fullfile(ESVM_MODELS_DIR, 'esvm_train_params.create_data_params.txt'),  'align', true);
+
+
+
+end
+

@@ -53,7 +53,8 @@ esvm_train_params =  set_field_if_not_exist(esvm_train_params, 'detect_padding',
 % Should we just initialize Exemlars and do NOT train them?
 esvm_train_params =  set_field_if_not_exist(esvm_train_params, 'should_just_initialize_models', 0);
 
-LABELS_PATH = '~/workspace/dataset_labeling/merged_data_19.02.16/labels_long_jump.mat';
+% TODO: make it as a field.
+LABELS_PATH = sprintf('~/workspace/dataset_labeling/merged_data_19.02.16/labels_%s.mat', esvm_train_params.positive_category_name);
 fprintf('Loading labels from %s ...\n', LABELS_PATH);
 % Labeled positive and negative frames for each anchor frame.
 esvm_train_params.labeled_data = load(LABELS_PATH);
