@@ -1,4 +1,4 @@
-function [] = ecnn_compute_features(category_name, data_info, output_dir)
+function [] = compute_features(category_name, data_info, output_dir)
 %COMPUTECNNFEATURES Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -21,9 +21,6 @@ crops_path = fullfile(dataset_path, 'crops_96x96');
 models = {'exemplar_cnn'};
 model = models{1};
 
-%check file existance
-pathsave = '/export/home/asanakoy/workspace/OlympicSports/exemplar_cnn/features/features';
-
 file_to_save = fullfile(output_dir, sprintf('features_%s_ecnn_fc5_15patches_zscores.mat', category_name));
 if exist(file_to_save, 'file')
     fprintf('Skip. File %s already exists!\n', file_to_save);
@@ -31,7 +28,7 @@ if exist(file_to_save, 'file')
 end
 
 % init network
-params.model_def_file = [HOME '/workspace/similarities/exemplar_cnn/deploy_',model,'.prototxt'];
+params.model_def_file = [HOME '/workspace/similarities/+exemplar_cnn/deploy_',model,'.prototxt'];
 params.model_file = sprintf([dataset_path '/exemplar_cnn/models/'...
                                   '64c5-128c5-256c5-512f_%s-8000-8000_1_iter_1560001.caffemodel'],...
                             category_name);
@@ -95,9 +92,10 @@ features = zscore(features);
 features_flip = zscore(features_flip);
 
 fprintf('features data size: %s\n', mat2str(size(features)));
+fprintf('features_flip data size: %s\n', mat2str(size(features_flip)));
 whos features
 fprintf('each feature vector size: %s\n', mat2str(size(features(1,:))));
 fprintf('Saving on disk...\n');
-save(file_to_save, '-v7.3', 'features', 'feature_vector_flip');
+save(file_to_save, '-v7.3', 'features', 'features_flip');
 
 end

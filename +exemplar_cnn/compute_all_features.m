@@ -1,4 +1,4 @@
-function [ output_args ] = compute_all_features( input_args )
+function [] = compute_all_features()
 %COMPUTE_ALL_FEATURES Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -8,8 +8,6 @@ output_dirpath = '~/workspace/OlympicSports/exemplar_cnn/features/fc5';
 
 data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
 
-features = [];
-features_flip = [];
 for i = 1:length(data_info.categoryNames)
     fprintf('Calculation ECNN features for %s...\n', data_info.categoryNames{i});
     
