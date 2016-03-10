@@ -1,4 +1,4 @@
-function [] = do_for_each_sequence(crops_dir_path, output_dir_path, function_handle)
+function [] = do_for_each_sequence(crops_dir_path, output_dir_path, function_handle, args)
 %Apply function function_handle to every sequence in the dataset.
 % function handle signature: function(seq_dir_path, output_dir_path, category_name, sequence_name)
 
@@ -16,7 +16,7 @@ parfor i = 1:length(categories)
         fprintf(clean_symbols);
         fprintf('%04d/%04d', j, length(sequences));
         seq_dir_path = fullfile(crops_dir_path, categories{i}, sequences{j});
-        function_handle(seq_dir_path, output_dir_path, categories{i}, sequences{j});
+        function_handle(seq_dir_path, output_dir_path, categories{i}, sequences{j}, args);
     end
     fprintf('\n');
 end

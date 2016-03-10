@@ -1,4 +1,4 @@
-function [ ] = extractCrops(begin_cat, end_cat)
+function [ ] = extractCropsHMDB(begin_cat, end_cat)
 
     dataset_dir = '/net/hciserver03/storage/asanakoy/workspace/HMDB51';
     local_dataset_dir = '/export/home/asanakoy/datasets/HMDB51';

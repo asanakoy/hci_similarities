@@ -12,23 +12,7 @@ if ~exist(resized_crops_otput_dir_path, 'dir')
     mkdir(resized_crops_otput_dir_path);
 end
 
-do_for_each_sequence(crops_dir_path, resized_crops_otput_dir_path, @resizeAllCropsFromSequence);
+args = [96, 96];
+do_for_each_sequence(crops_dir_path, resized_crops_otput_dir_path, @resize_all_crops_from_sequence, args);
 
-end
-
-function resizeAllCropsFromSequence(seq_dir_path, ...
-                               resized_crops_otput_dir_path, category_name, sequence_name)
-    NEW_IMAGE_SIZE = [96, 96];
-                           
-    resized_seq_dir_path = fullfile(resized_crops_otput_dir_path, category_name, sequence_name);        
-    if ~exist(resized_seq_dir_path, 'dir')
-        mkdir(resized_seq_dir_path);          
-    end
-        
-    crops = getFilesInDir(seq_dir_path, '.*\.png');
-
-    for k = 1:length(crops)
-        im = uint8(imresize(imread(fullfile(seq_dir_path, crops{k})), NEW_IMAGE_SIZE));
-        imwrite(im, fullfile(resized_seq_dir_path, crops{k}), 'png');
-    end   
 end

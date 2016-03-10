@@ -2,16 +2,23 @@ function [] = compute_similarities( category_name, dataset_path,  ...
                                               hog_pedro_path, hog_pedro_flipped_path, output_path )
 % Calculate intra-category pairwise correlations between
 % pedro-HOG representations of the samples from specified category. 
-narginchk(1, 5);
+narginchk(2, 5);
 
-if nargin == 1 
-    dataset_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports/';
-    hog_pedro_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports/data/hog_pedro_227x227_nonflipped.mat';
-    hog_pedro_flipped_path = '/net/hciserver03/storage/asanakoy/workspace/OlympicSports/data/hog_pedro_227x227_flipped.mat';
-    output_path = sprintf('/net/hciserver03/storage/asanakoy/workspace/OlympicSports/sim_pedro_hog/sim_hog_pedro_%s.mat', category_name);
+if nargin == 2
+    dataset_path = '~/workspace/ucf_sports/';
+    hog_pedro_path = fullfile(dataset_path, 'data/hog_pedro_227x227.mat');
+    hog_pedro_flipped_path = fullfile(dataset_path, 'data/hog_pedro_227x227.mat');
+    output_path = fullfile(dataset_path, sprintf('sim_pedro_hog/sim_hog_pedro_%s.mat', category_name));
+else
+    narginchk(5, 5);
 end
 
 fprintf('hod_pedro.compute_similarities for %s\n', category_name);
+
+[output_dir_path, name, ext] = fileparts(output_path);
+if ~exist(output_dir_path, 'dir')
+    mkdir(output_dir_path);
+end
 
 if exist(output_path, 'file')
     fprintf('Skip. File %s already exists!\n', output_path);
