@@ -65,6 +65,6 @@ roc_params.labels_filepath = sprintf(['~/workspace/dataset_labeling'...
                                        '/merged_data_19.02.16/labels_%s.mat'], category_name);
 
 % roc_params.path_simMatrix = ['~/workspace/OlympicSports/sim/simMatrix_', category_name, '.mat'];
-roc_params.path_simMatrix = ['~/workspace/OlympicSports/sim_pedro_hog/sim_max_hog_pedro_', category_name, '.mat'];
+roc_params.path_simMatrix = ['~/workspace/OlympicSports/sim_pedro_hog/sim_hog_pedro_', category_name, '.mat'];
 
 end
