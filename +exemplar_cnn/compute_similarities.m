@@ -6,9 +6,9 @@ narginchk(1,4);
 
 if nargin == 1 
     dataset_path = '~/workspace/OlympicSports/';
-    features_path = sprintf('~/workspace/OlympicSports/exemplar_cnn/features/fc5/features_%s_ecnn_fc5_15patches_zscores.mat', ...
+    features_path = sprintf('~/workspace/OlympicSports/exemplar_cnn/features/fc5/features_%s_ecnn_fc5_36patches_quadrantpool_zscores.mat', ...
                              category_name);
-    output_path = sprintf('~/workspace/OlympicSports/exemplar_cnn/similarities/fc5/sim_%s_ecnn_fc5_15patches_zscores.mat', category_name);
+    output_path = sprintf('~/workspace/OlympicSports/exemplar_cnn/similarities/fc5/sim_%s_ecnn_fc5_36patches_quadrantpool_zscores.mat', category_name);
 end
 
 fprintf('compute_similarities for %s\n', category_name);
