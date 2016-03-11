@@ -13,7 +13,7 @@ end
 dataset_path = roc_params.dataset_path;
 load(roc_params.labels_filepath);
 
-model_name = {roc_params.esvm_name, 'corr'};
+model_name = {roc_params.esvm_name, 'SIM'};
 ESVM_MODEL_INDEX = find(cellfun(@(x) strcmp(x, roc_params.esvm_name), model_name));
 SIM_MATRIX_MODEL_INDEX = find(cellfun(@(x) strncmpi(x, 'SIM', 3), model_name));
 CORR_INDEX  = find(cellfun(@(x) strcmp(x, 'corr'), model_name));
@@ -41,8 +41,8 @@ for model_num = 1:NMODELS
         end
         
         if model_num == SIM_MATRIX_MODEL_INDEX
-            
-            sims = simMatrix(labels(i).anchor, [labels(i).positives.ids,labels(i).negatives.ids]);
+            sims = getScoresFromSimMatrix(labels(i), simMatrix, simMatrix_flipped);
+%             sims = simMatrix(labels(i).anchor, [labels(i).positives.ids,labels(i).negatives.ids]);
 %             figure();
 %             showImage(category_offset + labels(i).anchor, dataset_path, ...
 %                 roc_params.data_info.sequenceFilesPathes, roc_params.data_info.sequenceLookupTable, ...
@@ -138,6 +138,25 @@ end
 
 end
 
+function scores = getScoresFromSimMatrix(label, simMatrix, simMatrix_flipped)
+% Get scores for the similarity matrix.
+
+scores = zeros(1, length(label.positives.ids) + length(label.negatives.ids));
+
+ids = [label.positives.ids label.negatives.ids];
+flipval = [label.positives.flipval label.negatives.flipval];
+
+for i = 1:length(ids)
+    frame_id = ids(i);
+    
+    if ~flipval(i)
+        scores(i) = simMatrix(label.anchor, frame_id);
+    else
+        scores(i) = simMatrix_flipped(label.anchor, frame_id);
+    end
+end
+
+end
 
 function scores = getScores(anchor_id, label, category_offset, esvm_model_path, roc_params, method)
 % Get scores for the labeled frames.
