@@ -14,7 +14,8 @@ for i = 1:length(anchor_global_ids)
     
     output_dir = fullfile(ESVM_MODELS_DIR, model_name);
     
-    has_final_model_file = ~isempty(getFilesInDir([output_dir, '/models'], '.*-svm\.mat'));
+    has_final_model_file = ~isempty(getFilesInDir([output_dir, '/models'], '.*-svm\.mat')) || ...
+                       ~isempty(getFilesInDir(output_dir, '.*-svm\.mat'));
     
     if (has_final_model_file || ...
          any(find(ismember(previously_trained.trained_model_names, model_name))))
