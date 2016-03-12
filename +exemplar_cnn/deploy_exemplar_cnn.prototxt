@@ -88,19 +88,19 @@ layer {
     num_output: 512
   }
 }
-layer {
-  name: "relu6"
-  type: "ReLU"
-  bottom: "fc6"
-  top: "fc6"
-}
-layer {
-  name: "fc7"
-  type: "InnerProduct"
-  bottom: "fc6"
-  top: "fc7"
-  inner_product_param {
-    num_output: 8000
-  }
-}
+#layer {
+#  name: "relu6"
+#  type: "ReLU"
+#  bottom: "fc6"
+#  top: "fc6"
+#}
+#layer {
+#  name: "fc7"
+#  type: "InnerProduct"
+#  bottom: "fc6"
+#  top: "fc7"
+#  inner_product_param {
+#   num_output: 8000
+#  }
+#}
 

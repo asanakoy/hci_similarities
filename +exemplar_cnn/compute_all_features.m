@@ -4,7 +4,7 @@ function [] = compute_all_features()
 
 
 dataset_path = '~/workspace/OlympicSports';
-output_dirpath = '~/workspace/OlympicSports/exemplar_cnn/features/fc5';
+output_dirpath = '~/workspace/OlympicSports/exemplar_cnn/features/fc4';
 
 data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
 

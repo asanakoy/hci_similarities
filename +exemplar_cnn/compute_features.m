@@ -21,7 +21,7 @@ crops_path = fullfile(dataset_path, 'crops_96x96');
 models = {'exemplar_cnn'};
 model = models{1};
 
-file_to_save = fullfile(output_dir, sprintf('features_%s_ecnn_fc5_36patches_quadrantpool_zscores.mat', category_name));
+file_to_save = fullfile(output_dir, sprintf('features_%s_ecnn_fc4_36patches_quadrantpool_zscores.mat', category_name));
 if exist(file_to_save, 'file')
     fprintf('Skip. File %s already exists!\n', file_to_save);
     return
@@ -54,8 +54,8 @@ while category_offset + 1 + category_size <= data_info.totalNumberOfVectors && .
 end
 
 category_size
-number_of_surrogate_classes = 8000;
-FEATURE_SIZE = 4 * 8000;
+feature_layer_size = 512;
+FEATURE_SIZE = 4 * feature_layer_size;
 features = zeros(category_size, FEATURE_SIZE, 'single');
 features_flip = zeros(category_size, FEATURE_SIZE, 'single');
 
@@ -70,8 +70,8 @@ for i = 1:category_size
         continue;
     end
 
-    features(i, :) = single(compute_image_feature(net, image, number_of_surrogate_classes));
-    features_flip(i, :) = single(compute_image_feature(net, utils.fliplr(image), number_of_surrogate_classes));
+    features(i, :) = single(compute_image_feature(net, image, feature_layer_size));
+    features_flip(i, :) = single(compute_image_feature(net, utils.fliplr(image), feature_layer_size));
 end
 fprintf('\n');
 
@@ -131,10 +131,10 @@ function feature = compute_quadrant_feature(net, quadrant, feature_size)
     feature = max(feature, [], 1);
 end
 
-function feature = compute_image_feature(net, image, number_of_surrogate_classes)
+function feature = compute_image_feature(net, image, feature_layer_size)
     feature = [];
     for quadrant_id = 1:4
         quadrant = get_quadrant(image, quadrant_id);
-        feature = [feature, compute_quadrant_feature(net, quadrant, number_of_surrogate_classes)];
+        feature = [feature, compute_quadrant_feature(net, quadrant, feature_layer_size)];
     end
 end
