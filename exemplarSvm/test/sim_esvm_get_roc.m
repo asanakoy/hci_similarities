@@ -1,10 +1,5 @@
-function [esvm_auc, corr_auc] = sim_esvm_get_roc(category_name, roc_params)
+function [result] = sim_esvm_get_roc(category_name, roc_params)
 %GETROC Plot ROC curve and calculate AUC.
-
-addpath(genpath(Config.SELF_ROOT));
-esvm_auc = -1;
-corr_auc = -1;
-
 
 if ~exist('roc_params', 'var')
     roc_params = get_roc_params(category_name);
@@ -13,8 +8,12 @@ end
 dataset_path = roc_params.dataset_path;
 load(roc_params.labels_filepath);
 
-model_name = {roc_params.esvm_name, 'SIM'};
-ESVM_MODEL_INDEX = find(cellfun(@(x) strcmp(x, roc_params.esvm_name), model_name));
+if ~isfield(roc_params, 'models_to_test')
+    model_name = {'ESVM', 'SIM'};
+else
+    model_name = roc_params.models_to_test;
+end
+ESVM_MODEL_INDEX = find(cellfun(@(x) strncmpi(x, 'ESVM', 3), model_name));
 SIM_MATRIX_MODEL_INDEX = find(cellfun(@(x) strncmpi(x, 'SIM', 3), model_name));
 CORR_INDEX  = find(cellfun(@(x) strcmp(x, 'corr'), model_name));
 
@@ -41,6 +40,10 @@ for model_num = 1:NMODELS
         end
         
         if model_num == SIM_MATRIX_MODEL_INDEX
+            assert(exist('simMatrix_flipped', 'var') || exist('simMatrix_flip', 'var'));
+            if ~exist('simMatrix_flipped', 'var')
+                simMatrix_flipped = simMatrix_flip;
+            end
             sims = getScoresFromSimMatrix(labels(i), simMatrix, simMatrix_flipped);
 %             sims = simMatrix(labels(i).anchor, [labels(i).positives.ids,labels(i).negatives.ids]);
 %             figure();
@@ -122,18 +125,17 @@ fileID = fopen([file_base '.txt'], 'w');
 for i = 1:NMODELS
     fprintf(fileID,'%s-auc:\t %.4f\n', model_name{i}, auc(i));
     fprintf('%s-auc:\t %.4f\n', model_name{i}, auc(i));
+    
+    result(i).auc = auc(i);
+    result(i).model_name = model_name{i};
+    
 end
 fclose(fileID);
 
 save_figure(gcf, file_base);
 if (ESVM_MODEL_INDEX)
     save(fullfile(dataset_path, roc_params.plots_dir, sprintf('sims_%s_%s.mat', ...
-                     category_name, model_name{ESVM_MODEL_INDEX})), 'sims_esvm');
-    esvm_auc = auc(ESVM_MODEL_INDEX);
-end
-
-if (CORR_INDEX)
-    corr_auc = auc(CORR_INDEX);
+                     category_name, roc_params.esvm_name)), 'sims_esvm');
 end
 
 end

@@ -38,8 +38,7 @@ if roc_params.use_plain_features == 1
     if exist('models_path', 'var')
         roc_params.esvm_models_dir = models_path;
     else
-        roc_params.esvm_models_dir = fullfile(roc_params.dataset_path, ...
-            'esvm/hog_pedro_initialization_esvm_model');
+        roc_params.esvm_models_dir = '~/tmp/test';
     end
     roc_params.esvm_name = 'ESVM-HOG-pedro-init';
 else

@@ -1,10 +1,10 @@
-function [ESVM_MODELS_DIR] = run(category_name, ESVM_NUMBER_OF_WORKERS)
+function [ESVM_MODELS_DIR] = run(dataset_path, category_name, ESVM_NUMBER_OF_WORKERS)
 %RUN Summary of this function goes here
 log_path = sprintf('~/tmp/standard_esvm_log_%s.txt', category_name);
 system(sprintf('mv %s %s.old', log_path, log_path));
 diary(log_path);
 
-[esvm_train_params, ESVM_MODELS_DIR, labels_dir_path] = sim_esvm.scripts.init(category_name);
+[esvm_train_params, ESVM_MODELS_DIR, labels_dir_path] = sim_esvm.scripts.init(dataset_path, category_name);
 
 [anchor_global_ids, anchor_flipvals] = sim_esvm.get_all_labeled_global_anchor_ids(labels_dir_path);
 

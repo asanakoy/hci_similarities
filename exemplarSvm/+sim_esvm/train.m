@@ -167,8 +167,8 @@ train_params.train_max_mined_images = data_info.totalNumberOfVectors;%2500;
 %defines one iteration)
 train_params.train_max_windows_per_iteration = 2000;
 
-%Maximum number of violating images before SVM is trained with current cache
 train_params.train_max_images_per_iteration = 1000;
+%Maximum number of images before SVM is trained with current cache
 
 %% Perform Exemplar-SVM training
 % Because display is turned on, we will show the result of each
