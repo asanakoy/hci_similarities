@@ -54,7 +54,8 @@ esvm_train_params =  set_field_if_not_exist(esvm_train_params, 'detect_padding',
 esvm_train_params =  set_field_if_not_exist(esvm_train_params, 'should_just_initialize_models', 0);
 
 % TODO: make it as a field.
-LABELS_PATH = sprintf('~/workspace/dataset_labeling/merged_data_19.02.16/labels_%s.mat', esvm_train_params.positive_category_name);
+LABELS_PATH = fullfile(esvm_train_params.dataset_path, ...
+    sprintf('dataset_labeling/merged_data_last/labels_%s.mat', esvm_train_params.positive_category_name));
 fprintf('Loading labels from %s ...\n', LABELS_PATH);
 % Labeled positive and negative frames for each anchor frame.
 esvm_train_params.labeled_data = load(LABELS_PATH);
@@ -99,7 +100,7 @@ if strcmp(esvm_train_params.create_negatives_policy, 'negative_cliques') ...
         || strcmp(esvm_train_params.training_type, 'clique_svm')
     
      esvm_train_params = set_field_if_not_exist(esvm_train_params, 'cliques_data_path', ...
-         '~/workspace/OlympicSports/clique-esvm/data/cliques_data.mat');
+         fullfile(esvm_train_params.dataset_path, 'clique-esvm/data/cliques_data.mat'));
      
     assert(exist(esvm_train_params.cliques_data_path, 'file') ~= 0, ...
         'File %s is not found', esvm_train_params.cliques_data_path);
