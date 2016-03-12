@@ -1,4 +1,4 @@
-function [] = chech_data_info( data_info, crops_path)
+function [] = check_data_info( data_info, crops_path)
 %CHECH_DATA_INFO Summary of this function goes here
 %   Detailed explanation goes here
 

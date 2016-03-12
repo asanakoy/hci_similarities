@@ -11,7 +11,7 @@ function [ ] = precompute_data_info(dataset_path)
 % end 
 fprintf('Precomputing DataInfo...\n');
 
-CROPS_DIR_NAME = 'crops_227x227';
+CROPS_DIR_NAME = 'crops_227x227_merged';
 crops_path = fullfile(dataset_path, CROPS_DIR_NAME);
 categoryNames = getNonEmptySubdirs(crops_path);
 
@@ -46,6 +46,6 @@ fprintf('\nSaving data to %s\n', filePathToSave);
 save(filePathToSave, '-v7.3', 'categoryNames', 'categoryLookupTable', 'totalNumberOfVectors');
 
 data_info = load(filePathToSave);
-chech_data_info(data_info, crops_path);
+check_data_info(data_info, crops_path);
 
 end

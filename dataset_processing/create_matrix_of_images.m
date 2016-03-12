@@ -6,7 +6,7 @@ if ~exist('img_extension', 'var')
     img_extension = 'png';
 end
 
-crops_dir_path = fullfile(dataset_path, 'crops_227x227');
+crops_dir_path = fullfile(dataset_path, 'crops_227x227_merged');
 
 categories = getNonEmptySubdirs(crops_dir_path);
 tic;
