@@ -128,6 +128,7 @@ for i = 1:NMODELS
     
     result(i).auc = auc(i);
     result(i).model_name = model_name{i};
+    result(i).category_name = category_name;
     
 end
 fclose(fileID);
