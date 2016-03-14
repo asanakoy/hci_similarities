@@ -1,6 +1,9 @@
-function [ result ] = get_roc( dataset_path, category_name )
+function [ result ] = get_roc( dataset_path, category_name, transfer_class)
 %GET_ROC Summary of this function goes here
 %   Detailed explanation goes here
+if ~exist('transfer_class', 'var')
+    transfer_class = '';
+end
 result = [];
 
 % roc_params = get_ucf_roc_params(category_name, dataset_path, {'SIM_hog_pedro'});
@@ -9,12 +12,12 @@ result = [];
 % roc_params = get_ucf_roc_params(category_name, dataset_path, {'SIM_alexnet_fc7'});
 % result = [result, sim_esvm_get_roc(category_name, roc_params)];
 
-roc_params = get_ucf_roc_params(category_name, dataset_path, {'ESVM'});
+roc_params = get_ucf_roc_params(category_name, dataset_path, {'SIM_Transfer'}, transfer_class);
 result = [result, sim_esvm_get_roc(category_name, roc_params)];
 
 end
 
-function [ roc_params ] = get_ucf_roc_params(category_name, dataset_path, models_to_test)
+function [ roc_params ] = get_ucf_roc_params(category_name, dataset_path, models_to_test, transfer_class)
 %GET_ROC_PARAMS Get deafult params for ROC plotting.
 
 roc_params.dataset_path = dataset_path;
@@ -40,9 +43,9 @@ if roc_params.use_plain_features == 1
 else
     detect_params.features_type = 'HOG-like';
     roc_params.esvm_models_dir = ['esvm/standard_esvm_no-pad_mining_1_models_', ...
-                                   category_name, '_1.0-random_from_other_categories_c0.01_Wpos50'];
+                                   category_name, '_0.1-random_from_other_categories_c0.01_Wpos50'];
     roc_params.esvm_models_dir = fullfile(roc_params.dataset_path, roc_params.esvm_models_dir);
-    roc_params.esvm_name = 'standard_esvm_HOG_no-pad_1.0-random_from_other_categories';
+    roc_params.esvm_name = 'standard_esvm_HOG_no-pad_0.1-random_from_other_categories';
 end
 detect_params.should_load_features_from_disk = roc_params.should_load_features_from_disk;
 
@@ -60,6 +63,11 @@ if strcmp(models_to_test{1}, 'SIM_hog_pedro')
     roc_params.path_simMatrix = ['sim_pedro_hog/sim_hog_pedro_', category_name, '.mat'];
 elseif strcmp(models_to_test{1}, 'SIM_alexnet_fc7')
     roc_params.path_simMatrix = ['alexnet/sim_matrices/simMatrix_', category_name, '_imagenet-alexnet_iter_0_fc7.mat'];
+elseif strcmp(models_to_test{1}, 'SIM_ours_fc7_prerelu')
+    roc_params.path_simMatrix = ['ours/sim_matrices/simMatrix_', category_name, '_ours_', category_name ,'_LR_0.001_M_0.9_BS_64_iter_2000_fc7_prerelu.mat'];
+elseif strcmp(models_to_test{1}, 'SIM_Transfer')
+    
+    roc_params.path_simMatrix = ['ours/sim_matrices/simMatrix_', category_name, '_', transfer_class, '_LR_0.001_M_0.9_BS_128_iter_20000_fc7_prerelu.mat'];
 end
 roc_params.path_simMatrix = fullfile(dataset_path, roc_params.path_simMatrix);
     
