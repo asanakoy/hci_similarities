@@ -4,7 +4,7 @@ classdef DatasetStructure
         CLIPS_DIR        = 'clips';
         BBOXES_DIR       = 'boxes';
         FRAMES_DIR       = 'frames';
-        CROPS_DIR        = 'crops';
+        CROPS_DIR        = 'crops_227x227';
         WHITEHOG_DIR     = 'whitehog';
         PAIRWISE_SIM_DIR = 'pairwise_sim';
         SIM_DIR          = 'similarities';
