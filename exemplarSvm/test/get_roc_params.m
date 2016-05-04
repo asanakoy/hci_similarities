@@ -8,7 +8,8 @@ roc_params.use_plain_features = 0;% ESVM Uses Plain features or Spatial.
 roc_params.should_load_features_from_disk = 0;
 is_single_category_features_file = 0;
 roc_params.features_path = ... % used only if use_plain_features = 1
-    '~/workspace/OlympicSports/alexnet/features/features_long_jump_imagenet-alexnet_iter_0_conv5.mat';
+    fullfile(roc_params.dataset_path, ...
+    'alexnet/features/features_long_jump_imagenet-alexnet_iter_0_conv5.mat');
 
 roc_params.esvm_crops_dir_name = 'crops_227x227';
 
@@ -39,6 +40,9 @@ if roc_params.use_plain_features == 1
         roc_params.esvm_models_dir = models_path;
     else
         roc_params.esvm_models_dir = '~/tmp/test';
+%         roc_params.esvm_models_dir = fullfile(roc_params.dataset_path, ...
+%             'esvm/alexnet_zscores_clique_svm_mining_1_models_long_jump_random_from_other_categories_c133');
+
     end
     roc_params.esvm_name = 'ESVM-HOG-pedro-init';
 else

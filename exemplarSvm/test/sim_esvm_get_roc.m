@@ -9,7 +9,7 @@ dataset_path = roc_params.dataset_path;
 load(roc_params.labels_filepath);
 
 if ~isfield(roc_params, 'models_to_test')
-    model_name = {'ESVM', 'SIM'};
+    model_name = {'ESVM'};
 else
     model_name = roc_params.models_to_test;
 end
@@ -22,6 +22,7 @@ figure
 
 NMODELS = length(model_name);
 sims_esvm = {};
+area = [];
 
 for model_num = 1:NMODELS
     if model_num == SIM_MATRIX_MODEL_INDEX
@@ -83,7 +84,7 @@ for model_num = 1:NMODELS
         %sims = sims/sum(sims);
         
         
-        [x{i},y{i}, ~] = perfcurve(ground_thruth, sims, true);
+        [x{i},y{i}, ~, area(i)] = perfcurve(ground_thruth, sims, true);
 %         if (model_num == 2)
 %             x{i} = x{i} + 0.02;
 %         end
@@ -105,6 +106,11 @@ for model_num = 1:NMODELS
         auc(model_num) = 0.0;
     end
 end
+
+[sorted_aucs, indices] = sort(area);
+anchor_ids = arrayfun(@(x) x.anchor, labels);
+% sorted_aucs
+% indices = indices'
 
 legend(model_name);
 xlabel('False positive rate'); ylabel('True positive rate');
