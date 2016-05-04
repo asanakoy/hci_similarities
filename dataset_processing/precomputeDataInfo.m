@@ -11,7 +11,7 @@ function [ ] = precomputeDataInfo(dataset_path)
 
 whitehog_path = DatasetStructure.getWhitehogDirPath(dataset_path);
 
-addpath('../lib'); % for subdir(...)
+% addpath('../lib'); % for subdir(...)
 sequenceFilesPathes = subdir(fullfile(whitehog_path, '*.mat'));
 sequenceFilesPathes = sort({sequenceFilesPathes.name});
 

@@ -1,4 +1,4 @@
-function [ ] = precompute_data_info(dataset_path)
+function [ ] = precompute_data_info(dataset_path, images_extension, is_single_dir)
 %precomputeCategoryLookupTable Build table containing categories for each frame.
 %   Saves result variables to file. 
 %   categories - list of categories' names
@@ -10,10 +10,21 @@ function [ ] = precompute_data_info(dataset_path)
 %     dataset_path = '/dir'
 % end 
 fprintf('Precomputing DataInfo...\n');
+if ~exist('images_extension', 'var')
+    images_extension = 'jpg';
+end
+if ~exist('is_single_dir', 'var')
+    is_single_dir = 0;
+end
 
-CROPS_DIR_NAME = 'crops_227x227_merged';
+CROPS_DIR_NAME = 'crops/train_227x227';
 crops_path = fullfile(dataset_path, CROPS_DIR_NAME);
-categoryNames = getNonEmptySubdirs(crops_path);
+
+if is_single_dir == 1
+    categoryNames = {''};
+else
+    categoryNames = getNonEmptySubdirs(crops_path);
+end
 
 
 totalNumberOfVectors = 0;
@@ -23,13 +34,22 @@ for i = 1:length(categoryNames)
     prev_counter = totalNumberOfVectors;
     current_category_name = categoryNames{i};
     
-    seq_names = getNonEmptySubdirs(fullfile(crops_path, current_category_name));
+    if is_single_dir == 1
+        seq_names = {''};
+    else
+        seq_names = getNonEmptySubdirs(fullfile(crops_path, current_category_name));
+    end
+    if isempty(seq_names)
+        fprintf('WARNING! No sequences found. Processing images in root %s\n', fullfile(crops_path, current_category_name));
+        seq_names = {''};
+    end
+    
     progress_struct = init_progress_string('Sequence:', length(seq_names), 1);
     for j = 1:length(seq_names)
         update_progress_string(progress_struct, j);
         
         images_filenames = getFilesInDir(fullfile(crops_path, current_category_name, seq_names{j}), ...
-                                         '.*\.jpg');
+                                         ['.*\.', images_extension]);
         totalNumberOfVectors = totalNumberOfVectors + length(images_filenames);
         
     end

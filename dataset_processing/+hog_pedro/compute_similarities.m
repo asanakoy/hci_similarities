@@ -5,10 +5,9 @@ function [] = compute_similarities( category_name, dataset_path,  ...
 narginchk(2, 5);
 
 if nargin == 2
-    dataset_path = '~/workspace/ucf_sports/';
-    hog_pedro_path = fullfile(dataset_path, 'data/hog_pedro_227x227.mat');
-    hog_pedro_flipped_path = fullfile(dataset_path, 'data/hog_pedro_227x227.mat');
-    output_path = fullfile(dataset_path, sprintf('sim_pedro_hog/sim_hog_pedro_%s.mat', category_name));
+    hog_pedro_path = fullfile(dataset_path, 'features/hog_pedro_227x227.mat');
+    hog_pedro_flipped_path = fullfile(dataset_path, 'features/hog_pedro_227x227.mat');
+    output_path = fullfile(dataset_path, sprintf('sim/sim_hog_pedro_%s.mat', category_name));
 else
     narginchk(5, 5);
 end
@@ -29,10 +28,16 @@ fprintf('Loading data info... ');
 data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
 fprintf('[OK]\n');
 
-fprintf('Computing category offset...\n');
-category_offset = get_category_offset(category_name, data_info);
-fprintf('Computing category size...\n');
-category_size = get_category_size(category_name, data_info);
+if strcmp(category_name, 'ALL') == 1
+    category_offset = 0;
+    category_size = data_info.totalNumberOfVectors;
+    fprintf('Computing SIM FOR ALL CATEGORIES (%d vectors)...\n', category_size);
+else
+    fprintf('Computing category offset...\n');
+    category_offset = get_category_offset(category_name, data_info);
+    fprintf('Computing category size...\n');
+    category_size = get_category_size(category_name, data_info);
+end
 
 fprintf('Opening hog files... ');
 hog_file = matfile(hog_pedro_path);

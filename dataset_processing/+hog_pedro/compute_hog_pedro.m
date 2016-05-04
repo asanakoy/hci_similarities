@@ -3,6 +3,11 @@ function [] = compute_hog_pedro( dataset_path, crops_dir_name, output_path )
 % This function uses HOG features implementation by Pedro Felzenszwalb, Deva Ramanan and presumably others.
 % crops_dir_name = 'crops_227x227'
 
+[output_dir_path, name, ext] = fileparts(output_path);
+if ~exist(output_dir_path, 'dir')
+    mkdir(output_dir_path);
+end
+
 HOG_CELL_SIZE = 8;
 
 fprintf('Opening crops global info file...\n');
