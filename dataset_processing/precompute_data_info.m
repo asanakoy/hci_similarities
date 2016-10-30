@@ -17,7 +17,7 @@ if ~exist('is_single_dir', 'var')
     is_single_dir = 0;
 end
 
-CROPS_DIR_NAME = 'crops/train_227x227';
+CROPS_DIR_NAME = 'crops_227x227';
 crops_path = fullfile(dataset_path, CROPS_DIR_NAME);
 
 if is_single_dir == 1
