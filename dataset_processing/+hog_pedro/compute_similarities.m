@@ -28,7 +28,7 @@ fprintf('Loading data info... ');
 data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
 fprintf('[OK]\n');
 
-if strcmp(category_name, 'ALL') == 1
+if strcmp(category_name, 'ALL') == 1 || isempty(category_name)
     category_offset = 0;
     category_size = data_info.totalNumberOfVectors;
     fprintf('Computing SIM FOR ALL CATEGORIES (%d vectors)...\n', category_size);
@@ -76,7 +76,7 @@ fprintf('getting hog_matrix for category. [%s]\n', fieldname);
 hog_for_category = hog_file.(fieldname)(:, :, :, category_offset + 1: category_offset + category_size);
 fprintf('Num of hog vectors: %d\n', length(hog_for_category));
 
-hog_matrix = zeros(length(hog_for_category), 26*26*31, 'single');
+hog_matrix = zeros(size(hog_for_category, 4), 26*26*31, 'single');
 for i = 1:length(hog_for_category)
     hog_matrix(i, :) = single(reshape(hog_for_category(:, :, :, i), 1, []));
 end
