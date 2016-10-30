@@ -1,12 +1,26 @@
-function [] = show_pairs(min_sim, max_sim, category_name, simMatrix, flipvals)
+function [] = show_pairs(min_sim, max_sim, category_name, truncate_number, simMatrix, flipval)
 %SHOW_PAIRS Summary of this function goes here
 %   Detailed explanation goes here
 
 dataset_path = '/export/home/asanakoy/workspace/OlympicSports/';
+if ~exist('truncate_number', 'var')
+    truncate_number = 1e9;
+end
+if ~exist('simMatrix', 'var')
+    [ simMatrix, flipval ] = twostream_cnn.load_sim_matrix(dataset_path, category_name);
+end
 simMatrix = triu(simMatrix);
 data_info = load(DatasetStructure.getDataInfoPath(dataset_path));
 
-[a, b, is_flipped] = twostream_cnn.create_pairs(min_sim, max_sim, category_name, simMatrix, flipvals);
+[a, b, is_flipped] = twostream_cnn.create_pairs(min_sim, max_sim, category_name, simMatrix, flipval);
+if truncate_number < length(a)
+    fprintf('Number of pairs Truncated to %d\n', truncate_number);
+    perm = randperm(length(a), truncate_number);
+    a = a(perm);
+    b = b(perm);
+    is_flipped = is_flipped(perm);
+end
+
 
 category_offset = get_category_offset(category_name, data_info);
 
