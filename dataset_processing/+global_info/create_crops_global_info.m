@@ -14,7 +14,8 @@ for i = 1:length(categories)
     fprintf('\nCat %d / %d: \nCurrent sequence:              ', i, length(categories));
     sequences = getNonEmptySubdirs(fullfile(crops_dir_path, categories{i}));
     if isempty(sequences)
-        fprintf('\nWARNING! No sequences found. Processing images in root %s\n', fullfile(crops_dir_path, categories{i}));
+        fprintf('\nWARNING! No sequences found. Processing images in root %s\n                 ', ...
+            fullfile(crops_dir_path, categories{i}));
         sequences = {''};
     end
     
